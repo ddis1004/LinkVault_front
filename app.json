@@ -21,10 +21,20 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "permissions":
+        ["INTERNET"]
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      [
+        "expo-font",
+        {
+          "fonts": ["./assets/fonts/Jalnan.ttf", "./assets/fonts/ONE Mobile Title.ttf", "./assets/fonts/Pretendard-Medium.otf"]
+        }
+      ]
+    ]
   }
 }
