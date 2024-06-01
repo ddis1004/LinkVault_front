@@ -1,47 +1,76 @@
-import { View, Text, TextInput, StyleSheet } from "react-native";
+import { View, Text, TextInput, StyleSheet, Pressable } from "react-native";
 import { useState } from "react";
 import OuterContainer from "../component/OuterContainer";
 import { darkTheme } from "../component/ThemeColor";
 import Header from "../component/Header";
 import DropDownPicker from "react-native-dropdown-picker";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
+
+const ADDLINK_URL = "/links/users";
 
 const AddLinkPage = () => {
   const [open, setOpen] = useState(false);
+  const [link, setLink] = useState("");
+  const [title, setTitle] = useState("");
+  const [memo, setMemo] = useState("");
   const [value, setValue] = useState(null);
   const [items, setItems] = useState([
     {
       label: "자동",
-      value: "apple",
+      value: "auto",
       containerStyle: { backgroundColor: darkTheme.level2 },
     },
     {
-      label: "리액트",
-      value: "banana",
-      containerStyle: { backgroundColor: darkTheme.level2 },
-    },
-    {
-      label: "네이티브",
-      value: "banan2",
+      label: "수동",
+      value: "manual",
       containerStyle: { backgroundColor: darkTheme.level2 },
     },
   ]);
+
+  const axiosPrivate = useAxiosPrivate();
+
+  const handleSubmit = async () => {
+    let postContent = {
+      title: title,
+      memo: memo,
+      url: link,
+      autoFolderSave: true,
+    };
+    if (title.length == 0) postContent.autoTitleSave = true;
+
+    try {
+      const response = await axiosPrivate.post(
+        ADDLINK_URL,
+        JSON.stringify(postContent)
+      );
+    } catch (err) {
+      console.log("add_link_error :");
+      console.log(err.response);
+    }
+  };
 
   return (
     <OuterContainer>
       <View style={styles.innerContainer}>
         <Header title={"링크 저장하기"} />
-        <View>
+        <View style={styles.inputContainer}>
           <Text style={styles.inputLabel}>복사한 링크</Text>
           <TextInput
             style={styles.input}
             placeholderTextColor="#7E7E7E"
             placeholder="링크를 붙여넣어주세요"
+            onChangeText={(text) => {
+              setLink(text);
+            }}
           ></TextInput>
         </View>
-        <View>
+        <View style={styles.inputContainer}>
           <Text style={styles.inputLabel}>제목</Text>
           <TextInput
             style={styles.input}
+            onChangeText={(text) => {
+              setTitle(text);
+            }}
             placeholderTextColor={darkTheme.placeholder}
             placeholder="제목을 입력해주세요"
           ></TextInput>
@@ -62,20 +91,24 @@ const AddLinkPage = () => {
             placeholder="자동"
             style={styles.picker}
           ></DropDownPicker>
-          <Text style={styles.inputComment}>
+          {/* <Text style={styles.inputComment}>
             * 미설정시 자동으로 분류됩니다.
-          </Text>
+          </Text> */}
         </View>
-        <View>
+        <View style={styles.inputContainer}>
           <Text style={styles.inputLabel}>메모</Text>
           <TextInput
             style={styles.memoInput}
             placeholderTextColor={darkTheme.placeholder}
+            onChangeText={(text) => setMemo(text)}
             multiline={true}
             textAlignVertical="top"
             placeholder="자유롭게 메모를 작성해주세요"
           ></TextInput>
         </View>
+        <Pressable style={styles.submitButton} onPress={() => handleSubmit()}>
+          <Text style={styles.submitButtonText}>저장</Text>
+        </Pressable>
       </View>
     </OuterContainer>
   );
@@ -84,8 +117,11 @@ const AddLinkPage = () => {
 const styles = StyleSheet.create({
   inputLabel: {
     color: darkTheme.text,
+    fontFamily: "Pretendard",
+    fontSize: 18,
     margin: 10,
   },
+  inputContainer: { marginBottom: 5 },
   innerContainer: {
     flex: 1,
     justifyContent: "flex-start",
@@ -125,6 +161,17 @@ const styles = StyleSheet.create({
     color: darkTheme.text,
     paddingLeft: 6,
     fontSize: 12,
+  },
+  submitButton: { marginTop: 10 },
+  submitButtonText: {
+    color: darkTheme.level1,
+    fontSize: 20,
+    fontFamily: "Pretendard",
+    alignSelf: "center",
+    backgroundColor: darkTheme.highlight_low,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
   },
 });
 
