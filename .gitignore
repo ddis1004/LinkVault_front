@@ -1,35 +1,64 @@
-# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
-
-# dependencies
-node_modules/
-
-# Expo
-.expo/
-dist/
-web-build/
-
-# Native
-*.orig.*
-*.jks
-*.p8
-*.p12
-*.key
-*.mobileprovision
-
-# Metro
-.metro-health-check*
-
-# debug
-npm-debug.*
-yarn-debug.*
-yarn-error.*
-
-# macOS
-.DS_Store
-*.pem
-
-# local env files
-.env*.local
-
-# typescript
-*.tsbuildinfo
+node_modules
+.expo/devices.json
+.expo/README.md
+.expo/metro/polyfill.js
+.expo/metro/polyfill.native.js
+.expo/metro/externals/assert/index.js
+.expo/metro/externals/async_hooks/index.js
+.expo/metro/externals/buffer/index.js
+.expo/metro/externals/child_process/index.js
+.expo/metro/externals/cluster/index.js
+.expo/metro/externals/console/index.js
+.expo/metro/externals/constants/index.js
+.expo/metro/externals/crypto/index.js
+.expo/metro/externals/dgram/index.js
+.expo/metro/externals/diagnostics_channel/index.js
+.expo/metro/externals/dns/index.js
+.expo/metro/externals/domain/index.js
+.expo/metro/externals/events/index.js
+.expo/metro/externals/fs/index.js
+.expo/metro/externals/fs/promises/index.js
+.expo/metro/externals/http/index.js
+.expo/metro/externals/http2/index.js
+.expo/metro/externals/https/index.js
+.expo/metro/externals/inspector/index.js
+.expo/metro/externals/module/index.js
+.expo/metro/externals/net/index.js
+.expo/metro/externals/os/index.js
+.expo/metro/externals/path/index.js
+.expo/metro/externals/perf_hooks/index.js
+.expo/metro/externals/process/index.js
+.expo/metro/externals/punycode/index.js
+.expo/metro/externals/querystring/index.js
+.expo/metro/externals/readline/index.js
+.expo/metro/externals/repl/index.js
+.expo/metro/externals/stream/index.js
+.expo/metro/externals/string_decoder/index.js
+.expo/metro/externals/timers/index.js
+.expo/metro/externals/tls/index.js
+.expo/metro/externals/trace_events/index.js
+.expo/metro/externals/tty/index.js
+.expo/metro/externals/url/index.js
+.expo/metro/externals/util/index.js
+.expo/metro/externals/v8/index.js
+.expo/metro/externals/vm/index.js
+.expo/metro/externals/wasi/index.js
+.expo/metro/externals/worker_threads/index.js
+.expo/metro/externals/zlib/index.js
+.expo/metro/shims/react-native-web/dist/cjs/exports/AppRegistry/AppContainer.js
+.expo/metro/shims/react-native-web/dist/cjs/exports/BackHandler/index.js
+.expo/metro/shims/react-native-web/dist/exports/AppRegistry/AppContainer.js
+.expo/metro/shims/react-native-web/dist/exports/BackHandler/index.js
+assets/MaterialIcons.ttf
+assets/fonts/BebasNeue-Regular.ttf
+assets/fonts/Jalnan.ttf
+assets/fonts/Jersey25-Regular.ttf
+assets/fonts/NotoSansKR-VariableFont_wght.ttf
+assets/fonts/ONE Mobile Title.ttf
+assets/fonts/Pretendard-Medium.otf
+app/build.gradle
+app/src/main/java/linkvault/App.java
+app/src/test/java/linkvault/AppTest.java
+LinkVault.7z
+babel.config.js
+babel.config.js
