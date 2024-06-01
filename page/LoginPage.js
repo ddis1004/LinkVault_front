@@ -1,33 +1,62 @@
 import { View, Text, Button, TextInput, Pressable } from "react-native";
+import { React, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { Dimensions, StyleSheet } from "react-native";
 import { useFonts } from "expo-font";
 import { darkTheme } from "../component/ThemeColor";
+import axios from "../api/axios";
+
+const LOGIN_URL = "/users/login";
 
 function LoginPage() {
+  const [id, setId] = useState("");
+  const [password, setPassword] = useState("");
+
   const navigation = useNavigation();
 
-  const buttonHandler = () => {
-    navigation.navigate("Main");
+  const buttonHandler = async (e) => {
+    try {
+      const response = await axios.post(
+        LOGIN_URL,
+        JSON.stringify({ email: id, password: password }),
+        {
+          withCredentials: true,
+        }
+      );
+      navigation.navigate("Main");
+      //console.log(response);
+    } catch (err) {
+      if (!err.response) {
+        console.log("NO SERVER RESPONSE");
+      } else if (err.response?.status == 401) {
+        console.log("FAILED LOGIN");
+      } else {
+        console.log("UNEXPECTED ERROR");
+      }
+    }
+    setId("");
+    setPassword("");
   };
 
   const signupHandler = () => {
     navigation.navigate("Signup");
   };
 
-  const [fontsLoaded] = useFonts({
-    ONEMobile: require("../assets/fonts/ONE Mobile Title.ttf"),
-    Pretendard: require("../assets/fonts/Pretendard-Medium.otf"),
-    Bebas: require("../assets/fonts/BebasNeue-Regular.ttf"),
-  });
-  if (!fontsLoaded) return null;
-
   return (
     <View style={styles.outerContainer}>
       <View style={styles.mainContainer}>
         <Text style={styles.title}>LinkVault</Text>
-        <TextInput style={styles.textInput} placeholder="ID"></TextInput>
-        <TextInput style={styles.textInput} placeholder="PASSWORD"></TextInput>
+        <TextInput
+          onChangeText={(text) => setId(text)}
+          style={styles.textInput}
+          placeholder="ID"
+        ></TextInput>
+        <TextInput
+          onChangeText={(text) => setPassword(text)}
+          style={styles.textInput}
+          placeholder="PASSWORD"
+          secureTextEntry
+        ></TextInput>
         <Pressable style={styles.button} onPress={buttonHandler}>
           <Text style={styles.buttonText}>로그인</Text>
         </Pressable>
