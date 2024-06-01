@@ -1,19 +1,46 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
-import Ionicons from "@expo/vector-icons/Ionicons";
+import { View, Text, StyleSheet, Pressable } from "react-native";
+import { Entypo } from "@expo/vector-icons";
+import { darkTheme } from "./ThemeColor";
 
-function DirectoryView({ directories }) {
+const DirectoryPanel = ({ directories, handleFolderClick }) => {
+  return (
+    <View>
+      <Text style={[styles.name, { marginBottom: 4 }]}>
+        링크를 선택해주세요
+      </Text>
+      <DirectoryView
+        directories={directories}
+        handleFolderClick={handleFolderClick}
+      />
+    </View>
+  );
+};
+
+function DirectoryView({ directories, handleFolderClick }) {
   return (
     <View style={styles.container}>
       <View style={styles.wrapper}>
-        {directories.map((directory, index) => (
+        {directories.nesting.map((directory, index) => (
           <View key={index}>
             <View style={styles.nameContainer}>
-              <Ionicons name="folder-sharp" size={20} />
-              <Text style={styles.name}>{directory.name}</Text>
+              <Pressable
+                style={styles.nameContainer}
+                onPress={() => handleFolderClick(directory.name)}
+              >
+                <Entypo
+                  name="folder"
+                  size={16}
+                  color={darkTheme.highlight_low}
+                />
+                <Text style={styles.name}>{directory.name}</Text>
+              </Pressable>
             </View>
-            {directory.inner.length > 0 && (
-              <DirectoryView directories={directory.inner} />
+            {directories.nesting.length > 0 && (
+              <DirectoryView
+                directories={directories.nesting[0]}
+                handleFolderClick={handleFolderClick}
+              />
             )}
           </View>
         ))}
@@ -25,20 +52,23 @@ function DirectoryView({ directories }) {
 const styles = StyleSheet.create({
   container: {
     height: "auto",
-    padding: 10,
+    paddingVertical: 5,
+    paddingLeft: 20,
   },
   wrapper: {
-    backgroundColor: "#999999",
-    padding: 10,
+    backgroundColor: darkTheme.level2,
     borderRadius: 8,
   },
   nameContainer: {
     flexDirection: "row",
+    alignItems: "center",
   },
   name: {
     fontSize: 18,
+    fontFamily: "Pretendard",
+    color: darkTheme.text,
     marginLeft: 10,
   },
 });
 
-export default DirectoryView;
+export default DirectoryPanel;
