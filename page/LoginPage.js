@@ -5,6 +5,7 @@ import { Dimensions, StyleSheet } from "react-native";
 import { useFonts } from "expo-font";
 import { darkTheme } from "../component/ThemeColor";
 import axios from "../api/axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const LOGIN_URL = "/users/login";
 
@@ -23,8 +24,16 @@ function LoginPage() {
           withCredentials: true,
         }
       );
+
+      const tokenInfo = response.data.result.tokenInfo;
+      AsyncStorage.setItem(
+        "Tokens",
+        JSON.stringify({
+          accessToken: tokenInfo.accessToken,
+          refreshToken: tokenInfo.refreshToken,
+        })
+      );
       navigation.navigate("Main");
-      //console.log(response);
     } catch (err) {
       if (!err.response) {
         console.log("NO SERVER RESPONSE");
@@ -34,8 +43,6 @@ function LoginPage() {
         console.log("UNEXPECTED ERROR");
       }
     }
-    setId("");
-    setPassword("");
   };
 
   const signupHandler = () => {

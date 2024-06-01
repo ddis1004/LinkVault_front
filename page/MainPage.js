@@ -1,14 +1,17 @@
-import { React, useState } from "react";
+import React, { useState } from "react";
 import { View, Text, StyleSheet, ScrollView, Pressable } from "react-native";
+import { useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import OuterContainer from "../component/OuterContainer";
 import { darkTheme } from "../component/ThemeColor";
 import ReadStatusPanel from "../component/ReadStatusPanel";
 import MainDirectoryPanel from "../component/MainDirectoryPanel";
 import axios from "../api/axios";
 import LinkViewPanel from "../component/LinkViewPanel";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
 
 const unreadLinkURL = "";
-const directoryURL = "";
+const DIRECTORY_URL = "/directories";
 const recommendationURL = "";
 
 const dummyDataUnread = { total: 3, read: 1 };
@@ -36,6 +39,27 @@ const dummyDataRecommendation = {
 };
 
 function MainPage() {
+  const [directoryData, setDirectoryData] = useState([]);
+  const axiosPrivate = useAxiosPrivate();
+
+  // axiosPrivate.interceptors.request.use((request) => {
+  //   //console.log(request);
+  // });
+
+  useFocusEffect(
+    useCallback(() => {
+      const fetchData = async () => {
+        try {
+          const response = await axiosPrivate.get(DIRECTORY_URL);
+          console.log("directory response : " + response.data);
+          // setDirectoryData(response.data);
+        } catch (err) {
+          console.log(err);
+        }
+      };
+      fetchData();
+    }, [])
+  );
   return (
     <OuterContainer>
       <ScrollView style={styles.innerContainer}>
@@ -50,7 +74,13 @@ function MainPage() {
         <Pressable>
           <Text style={styles.directoryTitle}>내 디렉토리</Text>
           <View style={styles.directoryContainer}>
-            <MainDirectoryPanel directory={dummyDataDirectory} />
+            {dummyDataDirectory.length > 0 ? (
+              <MainDirectoryPanel directory={dummyDataDirectory} />
+            ) : (
+              <View>
+                <Text>디렉토리가 없습니다. 링크를 저장해보세요</Text>
+              </View>
+            )}
           </View>
         </Pressable>
         <View style={styles.recommendationContainer}>
