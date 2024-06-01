@@ -1,10 +1,13 @@
 import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { React, useState, useCallback } from "react";
 import OuterContainer from "../component/OuterContainer";
 import Header from "../component/Header";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { darkTheme } from "../component/ThemeColor";
 import { Image } from "expo-image";
 import LinkViewPanel from "../component/LinkViewPanel";
+import { useFocusEffect } from "@react-navigation/native";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
 
 const dummyData = {
   hierarchy: [
@@ -71,38 +74,90 @@ const dummyData = {
 };
 
 const DirectoryViewPage = ({ route }) => {
+  const [response, setResponse] = useState({});
+  const [links, setLinks] = useState([]);
+  const [parentName, setParentName] = useState("");
+  const [currentDirectory, setCurrentDirectory] = useState("");
   const directory = route.params.directory;
+  const axiosPrivate = useAxiosPrivate();
 
-  //API Call for this directory
+  const DIRECTORY_URL = "/directories/" + route.params.directory;
+
+  useFocusEffect(
+    useCallback(() => {
+      const fetchData = async () => {
+        try {
+          const response = await axiosPrivate.get(DIRECTORY_URL);
+          setLinks(response.data.result.userLinks);
+          setResponse(response.data.result);
+          setCurrentDirectory(response.data.result.directoryName);
+        } catch (err) {
+          console.log(err.response);
+        }
+      };
+      fetchData();
+    }, [])
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      if (response.parentFolderId != null) {
+        const PARENT_URL = "/directories/" + response.parentFolderId;
+        const fetchData = async () => {
+          try {
+            const response = await axiosPrivate.get(PARENT_URL);
+            setParentName(response.data.result.directoryName);
+          } catch (err) {
+            console.log(err.response);
+          }
+        };
+        fetchData();
+      }
+    }, [])
+  );
 
   return (
     <OuterContainer>
       <ScrollView>
         <Header title={"내 저장 폴더"} />
-        <Heirarchy hierarchy={dummyData.hierarchy} />
-        <View style={styles.category}>
-          <Text style={styles.categoryTitle}>폴더</Text>
-        </View>
-        <View>
-          <View style={styles.gridContainer}>
-            <View style={styles.columnContainer}>
-              <GridColumn col={0} folders={dummyData.folders} />
+        <Heirarchy hierarchy={[parentName, currentDirectory]} />
+        {response.childFoldersName != null && (
+          <View>
+            <View style={styles.category}>
+              <Text style={styles.categoryTitle}>폴더</Text>
             </View>
-            <View style={styles.columnContainer}>
-              <GridColumn col={1} folders={dummyData.folders} />
-            </View>
-            <View style={styles.columnContainer}>
-              <GridColumn col={2} folders={dummyData.folders} />
-            </View>
+            {response.childFoldersName.length > 0 ? (
+              <View>
+                <View style={styles.gridContainer}>
+                  <View style={styles.columnContainer}>
+                    <GridColumn col={0} folders={response.childFoldersName} />
+                  </View>
+                  <View style={styles.columnContainer}>
+                    <GridColumn col={1} folders={response.childFoldersName} />
+                  </View>
+                  <View style={styles.columnContainer}>
+                    <GridColumn col={2} folders={response.childFoldersName} />
+                  </View>
+                </View>
+              </View>
+            ) : (
+              <View>
+                <Text style={[styles.categoryTitle, { alignSelf: "center" }]}>
+                  폴더가 없습니다
+                </Text>
+              </View>
+            )}
           </View>
-        </View>
+        )}
+
         <View style={styles.category}>
           <Text style={styles.categoryTitle}>링크</Text>
         </View>
         <View>
-          {dummyData.links.map((item, index) => (
-            <LinkViewPanel key={item.id} link={item} />
-          ))}
+          {links != null &&
+            links.map((item, index) => (
+              <LinkViewPanel key={item.id} link={item} />
+            ))}
         </View>
       </ScrollView>
     </OuterContainer>
@@ -123,8 +178,10 @@ const FolderItem = ({ folder }) => {
   });
   return (
     <View style={styles.container}>
-      <Image style={styles.image} source={{ uri: folder.sampleImage }} />
-      <Text style={styles.folderName}>{folder.name}</Text>
+      <Pressable>
+        <Image style={styles.image} source={{ uri: folder.sampleImage }} />
+        <Text style={styles.folderName}>{folder.name}</Text>
+      </Pressable>
     </View>
   );
 };
@@ -172,7 +229,7 @@ const Heirarchy = ({ hierarchy }) => {
             size={20}
             color={darkTheme.text}
           />
-          <Text style={styles.folderText}> {item.name} </Text>
+          <Text style={styles.folderText}> {item} </Text>
           {index < hierarchy.length - 1 && (
             <Text style={styles.folderText}>{" >   "}</Text>
           )}

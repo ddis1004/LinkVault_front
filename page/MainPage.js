@@ -53,12 +53,7 @@ function MainPage() {
       const fetchData = async () => {
         try {
           const response = await axiosPrivate.get(DIRECTORY_URL);
-          //console.log(response.data);
-          console.log(response.data.result.recommendedLink);
           setResponse(response.data.result);
-          //setRecommendation(response.data.result.recommendedLink);
-
-          // setDirectoryData(response.data);
         } catch (err) {
           console.log(err);
         }

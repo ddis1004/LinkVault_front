@@ -8,13 +8,13 @@ import {
 import { darkTheme } from "./ThemeColor";
 import { Image } from "expo-image";
 import { Entypo } from "@expo/vector-icons";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 const LinkViewPanel = ({ link }) => {
-  console.log(link);
   const [isVisible, setVisible] = useState(false);
   const contentHeight = useRef(new Animated.Value(0)).current;
   const maxContentHeight = 600;
+  const date = new Date(link.createdAt);
 
   const toggleContent = () => {
     setVisible(!isVisible);
@@ -38,8 +38,14 @@ const LinkViewPanel = ({ link }) => {
         )}
 
         <View style={styles.headerTextContainer}>
-          <Text style={styles.title}>{link.title}</Text>
-          {/* <Text style={styles.date}>{link.date}</Text> */}
+          <Text ellipsizeMode="tail" numberOfLines={1} style={styles.title}>
+            {link.title}
+          </Text>
+          {link.createdAt != null && (
+            <Text
+              style={styles.date}
+            >{`${date.getFullYear()} 년 ${date.getMonth()}월 ${date.getDate()}일 ${date.getHours()}:${date.getMinutes()}`}</Text>
+          )}
         </View>
         <Entypo
           style={styles.editIcon}
@@ -53,9 +59,15 @@ const LinkViewPanel = ({ link }) => {
         {link.summary != null && (
           <View>
             <Text style={styles.summaryHeader}>요약</Text>
-            <Text style={styles.summaryText}>{link.summary[0]}</Text>
-            <Text style={styles.summaryText}>{link.summary[1]}</Text>
-            <Text style={styles.summaryText}>{link.summary[2]}</Text>
+            <Text style={styles.summaryText}>
+              {link.summary.split("\n")[0]}
+            </Text>
+            <Text style={styles.summaryText}>
+              {link.summary.split("\n")[1]}
+            </Text>
+            <Text style={styles.summaryText}>
+              {link.summary.split("\n")[2]}
+            </Text>
           </View>
         )}
         {link.note != null && (
@@ -120,8 +132,9 @@ const styles = StyleSheet.create({
     color: darkTheme.text,
     fontFamily: "Pretendard",
     fontSize: 16,
-    margin: 6,
+    margin: 2,
     padding: 5,
+    paddingTop: 10,
     borderTopWidth: 1,
     borderTopColor: darkTheme.level2,
   },

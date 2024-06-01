@@ -63,6 +63,7 @@ const MainDirectoryPanel = ({ directory }) => {
                 key={index}
                 name={item.name}
                 count={item.linkCount}
+                route={item.id}
               />
             );
           } else {
