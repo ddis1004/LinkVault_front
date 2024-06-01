@@ -11,7 +11,7 @@ import LinkViewPanel from "../component/LinkViewPanel";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 
 const unreadLinkURL = "";
-const DIRECTORY_URL = "/directories";
+const DIRECTORY_URL = "/users/home";
 const recommendationURL = "";
 
 const dummyDataUnread = { total: 3, read: 1 };
@@ -40,6 +40,8 @@ const dummyDataRecommendation = {
 
 function MainPage() {
   const [directoryData, setDirectoryData] = useState([]);
+  const [recommendation, setRecommendation] = useState({});
+  const [response, setResponse] = useState({});
   const axiosPrivate = useAxiosPrivate();
 
   // axiosPrivate.interceptors.request.use((request) => {
@@ -51,7 +53,11 @@ function MainPage() {
       const fetchData = async () => {
         try {
           const response = await axiosPrivate.get(DIRECTORY_URL);
-          console.log("directory response : " + response.data);
+          //console.log(response.data);
+          console.log(response.data.result.recommendedLink);
+          setResponse(response.data.result);
+          //setRecommendation(response.data.result.recommendedLink);
+
           // setDirectoryData(response.data);
         } catch (err) {
           console.log(err);
@@ -60,6 +66,7 @@ function MainPage() {
       fetchData();
     }, [])
   );
+  console.log(response);
   return (
     <OuterContainer>
       <ScrollView style={styles.innerContainer}>
@@ -71,22 +78,26 @@ function MainPage() {
             <ReadStatusPanel data={dummyDataUnread} />
           </View>
         </Pressable>
-        <Pressable>
-          <Text style={styles.directoryTitle}>내 디렉토리</Text>
-          <View style={styles.directoryContainer}>
-            {dummyDataDirectory.length > 0 ? (
-              <MainDirectoryPanel directory={dummyDataDirectory} />
-            ) : (
-              <View>
-                <Text>디렉토리가 없습니다. 링크를 저장해보세요</Text>
-              </View>
-            )}
+        {response.directories != null && (
+          <View>
+            <Text style={styles.directoryTitle}>내 디렉토리</Text>
+            <View style={styles.directoryContainer}>
+              {response.directories.length > 0 ? (
+                <MainDirectoryPanel directory={response.directories} />
+              ) : (
+                <View>
+                  <Text>디렉토리가 없습니다. 링크를 저장해보세요</Text>
+                </View>
+              )}
+            </View>
           </View>
-        </Pressable>
-        <View style={styles.recommendationContainer}>
-          <Text style={styles.directoryTitle}>이런 링크는 어떠세요?</Text>
-          <LinkViewPanel link={dummyDataRecommendation} />
-        </View>
+        )}
+        {response.recommendedLink != null && (
+          <View style={styles.recommendationContainer}>
+            <Text style={styles.directoryTitle}>이런 링크는 어떠세요?</Text>
+            <LinkViewPanel link={response.recommendedLink} />
+          </View>
+        )}
       </ScrollView>
     </OuterContainer>
   );

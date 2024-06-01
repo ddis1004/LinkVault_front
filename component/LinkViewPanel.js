@@ -11,6 +11,7 @@ import { Entypo } from "@expo/vector-icons";
 import { useState, useRef } from "react";
 
 const LinkViewPanel = ({ link }) => {
+  console.log(link);
   const [isVisible, setVisible] = useState(false);
   const contentHeight = useRef(new Animated.Value(0)).current;
   const maxContentHeight = 600;
@@ -27,10 +28,18 @@ const LinkViewPanel = ({ link }) => {
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.header} onPress={toggleContent}>
-        <Image source={link.siteLogo} style={styles.siteLogo} />
+        {link.siteLogo != null ? (
+          <Image source={link.siteLogo} style={styles.siteLogo} />
+        ) : (
+          <Image
+            source={require("../assets/logo_placeholder.jpg")}
+            style={styles.siteLogo}
+          />
+        )}
+
         <View style={styles.headerTextContainer}>
           <Text style={styles.title}>{link.title}</Text>
-          <Text style={styles.date}>{link.date}</Text>
+          {/* <Text style={styles.date}>{link.date}</Text> */}
         </View>
         <Entypo
           style={styles.editIcon}
@@ -40,17 +49,21 @@ const LinkViewPanel = ({ link }) => {
         />
       </TouchableOpacity>
       <Animated.View style={[styles.content, { height: contentHeight }]}>
-        <Image source={link.image} style={styles.image} />
-        <View>
-          <Text style={styles.summaryHeader}>요약</Text>
-          <Text style={styles.summaryText}>{link.summary[0]}</Text>
-          <Text style={styles.summaryText}>{link.summary[1]}</Text>
-          <Text style={styles.summaryText}>{link.summary[2]}</Text>
-        </View>
-        <View>
-          <Text style={styles.summaryHeader}>메모</Text>
-          <Text style={styles.summaryText}>{link.note}</Text>
-        </View>
+        <Image source={link.thumbnail} style={styles.image} />
+        {link.summary != null && (
+          <View>
+            <Text style={styles.summaryHeader}>요약</Text>
+            <Text style={styles.summaryText}>{link.summary[0]}</Text>
+            <Text style={styles.summaryText}>{link.summary[1]}</Text>
+            <Text style={styles.summaryText}>{link.summary[2]}</Text>
+          </View>
+        )}
+        {link.note != null && (
+          <View>
+            <Text style={styles.summaryHeader}>메모</Text>
+            <Text style={styles.summaryText}>{link.note}</Text>
+          </View>
+        )}
       </Animated.View>
     </View>
   );
@@ -79,6 +92,7 @@ const styles = StyleSheet.create({
   title: {
     color: darkTheme.text,
     fontSize: 16,
+    overflow: "hidden",
   },
   date: {
     color: darkTheme.text,

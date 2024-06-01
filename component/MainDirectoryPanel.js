@@ -8,16 +8,18 @@ const DirectoryItem = ({ name, count, route }) => {
 
   return (
     <Pressable
-      onPress={() => navigation.navigate("Directory", { directory: "hi" })}
+      onPress={() => navigation.navigate("Directory", { directory: route })}
       style={{ flex: 1, margin: 5 }}
     >
       <View style={styles.directoryCard}>
         <Text style={styles.cardText}>{name}</Text>
-        <View style={{ flexDirection: "row", marginTop: 4 }}>
+        <View
+          style={{ flexDirection: "row", marginTop: 4, alignItems: "center" }}
+        >
           <Entypo
             style={{ paddingTop: 3 }}
             name="link"
-            size={24}
+            size={20}
             color={darkTheme.text}
           />
           <Text style={styles.cardText}>{count}</Text>
@@ -44,8 +46,8 @@ const MainDirectoryPanel = ({ directory }) => {
               <DirectoryItem
                 key={index}
                 name={item.name}
-                count={item.count}
-                route={item.route}
+                count={item.linkCount}
+                route={item.id}
               />
             );
           } else {
@@ -57,7 +59,11 @@ const MainDirectoryPanel = ({ directory }) => {
         {directory.map((item, index) => {
           if (index % 2 == 1) {
             return (
-              <DirectoryItem key={index} name={item.name} count={item.count} />
+              <DirectoryItem
+                key={index}
+                name={item.name}
+                count={item.linkCount}
+              />
             );
           } else {
             return null;
@@ -81,18 +87,21 @@ const styles = StyleSheet.create({
   verticaList: {
     flexDirection: "column",
     flex: 1,
+    justifyContent: "space-between",
   },
   directoryCard: {
     flex: 1,
     borderRadius: 10,
     backgroundColor: darkTheme.level2,
-    padding: 20,
+    padding: 10,
+    paddingLeft: 20,
+    minHeight: 80,
     justifyContent: "space-between",
   },
   emptyCard: {
     flex: 1,
     margin: 10,
-    padding: 20,
+    padding: 10,
   },
   cardText: {
     color: darkTheme.text,
