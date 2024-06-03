@@ -156,7 +156,8 @@ const SettingModal = ({
     controlButton: {
       paddingHorizontal: 15,
       marginTop: 20,
-      marginHorizontal: 10,
+      marginRight: 5,
+      marginLeft: 15,
       borderRadius: 10,
       justifyContent: "center",
     },
@@ -164,6 +165,7 @@ const SettingModal = ({
       flex: 1,
     },
     buttonText: {
+      fontFamily: "Pretendard",
       color: darkTheme.text,
       fontSize: 20,
       alignSelf: "center",
@@ -202,6 +204,7 @@ const SettingModal = ({
               />
             ) : (
               <Slider
+                style={{ marginTop: 30 }}
                 minimumValue={1}
                 maximumValue={24}
                 step={1}
@@ -228,7 +231,9 @@ const SettingModal = ({
               ]}
               onPress={() => handleSubmit()}
             >
-              <Text style={styles.buttonText}>확인</Text>
+              <Text style={[styles.buttonText, { color: darkTheme.level1 }]}>
+                확인
+              </Text>
             </Pressable>
           </View>
         </View>
