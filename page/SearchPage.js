@@ -34,6 +34,7 @@ const SearchPage = () => {
   const [show, setShow] = useState(false);
   const [pickerMode, setPickerMode] = useState("");
   const [searchText, setSearchText] = useState("");
+  const [searchMode, setSearchMode] = useState("title+content"); //title + content, summary, memo
   const [searchButtonWidth] = useState(new Animated.Value(0));
 
   const PeriodButton = ({ name, text }) => {
@@ -161,6 +162,48 @@ const SearchPage = () => {
     );
   };
 
+  const SearchModeButton = ({ name, text }) => {
+    const styles = StyleSheet.create({
+      searchModeButton: {
+        flex: 1,
+        height: 40,
+        backgroundColor: darkTheme.background,
+        borderWidth: 1,
+        borderColor: darkTheme.outline,
+        alignContent: "center",
+        padding: 8,
+      },
+      buttonText: {
+        alignSelf: "center",
+        textAlignVertical: "center",
+        color: darkTheme.text,
+        fontFamily: "Pretendard",
+        fontSize: 16,
+      },
+    });
+    return (
+      <Pressable
+        style={[
+          styles.searchModeButton,
+          searchMode == name
+            ? { backgroundColor: darkTheme.highlight_low }
+            : null,
+        ]}
+        onPress={() => setSearchMode(name)}
+      >
+        <Text
+          style={[
+            styles.buttonText,
+            searchMode == name ? { color: darkTheme.level1 } : null,
+            name == "title+content" ? { fontSize: 14 } : null,
+          ]}
+        >
+          {text}
+        </Text>
+      </Pressable>
+    );
+  };
+
   function formatDate(dateObj) {
     const year = dateObj.getFullYear();
     const month = dateObj.getMonth() + 1; // getMonth() returns 0-11, so we add 1
@@ -225,8 +268,15 @@ const SearchPage = () => {
           </Animated.View>
         </View>
 
-        <Text style={styles.keywordLabel}>추천 검색어</Text>
-        <SearchWordsPanel list={dummyData.searchRecommend} />
+        {/* <Text style={styles.keywordLabel}>추천 검색어</Text>
+        <SearchWordsPanel list={dummyData.searchRecommend} /> */}
+        <Text style={styles.keywordLabel}>검색 방식</Text>
+        <View style={styles.periodButtonPanel}>
+          <SearchModeButton name={"title+content"} text={"제목+내용"} />
+          <SearchModeButton name={"title"} text={"제목"} />
+          <SearchModeButton name={"summary"} text={"요약"} />
+          <SearchModeButton name={"memo"} text={"메모"} />
+        </View>
 
         <Text style={[styles.keywordLabel, { marginTop: 30 }]}>검색 기간</Text>
         <View style={styles.periodButtonPanel}>
@@ -303,12 +353,13 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     marginHorizontal: 15,
     marginTop: 15,
-    marginBottom: 15,
+    marginBottom: 30,
     color: darkTheme.text,
   },
   periodButtonPanel: {
     flexDirection: "row",
     marginHorizontal: 20,
+    marginBottom: 10,
     height: 40,
   },
   datePanel: {
