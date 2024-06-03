@@ -61,7 +61,7 @@ function MainPage() {
       fetchData();
     }, [])
   );
-  console.log(response);
+  
   return (
     <OuterContainer>
       <ScrollView style={styles.innerContainer}>
