@@ -7,25 +7,26 @@ const DirectoryItem = ({ name, count, route }) => {
   const navigation = useNavigation();
 
   return (
-    <Pressable
-      onPress={() => navigation.navigate("Directory", { directory: route })}
-      style={{ flex: 1, margin: 5 }}
-    >
-      <View style={styles.directoryCard}>
-        <Text style={styles.cardText}>{name}</Text>
-        <View
-          style={{ flexDirection: "row", marginTop: 4, alignItems: "center" }}
-        >
-          <Entypo
-            style={{ paddingTop: 3 }}
-            name="link"
-            size={20}
-            color={darkTheme.text}
-          />
-          <Text style={styles.cardText}>{count}</Text>
+    <View style={styles.folderItemWrapper}>
+      <Pressable
+        onPress={() => navigation.navigate("Directory", { directory: route })}
+      >
+        <View style={styles.directoryCard}>
+          <Text style={styles.cardText}>{name}</Text>
+          <View
+            style={{ flexDirection: "row", marginTop: 4, alignItems: "center" }}
+          >
+            <Entypo
+              style={{ paddingTop: 3 }}
+              name="link"
+              size={20}
+              color={darkTheme.text}
+            />
+            <Text style={styles.cardText}>{count}</Text>
+          </View>
         </View>
-      </View>
-    </Pressable>
+      </Pressable>
+    </View>
   );
 };
 const EmptyCard = () => {
@@ -82,7 +83,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     margin: 0,
     padding: 20,
-    flex: 1,
+    flex: 0,
     flexDirection: "row",
   },
   verticaList: {
@@ -91,7 +92,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   directoryCard: {
-    flex: 1,
+    flex: 0,
     borderRadius: 10,
     backgroundColor: darkTheme.level2,
     padding: 10,
@@ -100,7 +101,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   emptyCard: {
-    flex: 1,
+    flex: 0,
     margin: 10,
     padding: 10,
   },
@@ -108,6 +109,10 @@ const styles = StyleSheet.create({
     color: darkTheme.text,
     fontFamily: "Pretendard",
     fontSize: 22,
+  },
+  folderItemWrapper: {
+    flex: 0,
+    margin: 5,
   },
 });
 

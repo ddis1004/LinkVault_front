@@ -61,7 +61,7 @@ function MainPage() {
       fetchData();
     }, [])
   );
-  
+
   return (
     <OuterContainer>
       <ScrollView style={styles.innerContainer}>
@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
   directoryContainer: {
-    height: 300,
+    height: "auto",
     marginHorizontal: 10,
     marginVertical: 5,
   },
