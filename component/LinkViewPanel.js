@@ -13,7 +13,7 @@ import { useState, useRef, useEffect } from "react";
 const LinkViewPanel = ({ link }) => {
   const [isVisible, setVisible] = useState(false);
   const contentHeight = useRef(new Animated.Value(0)).current;
-  const maxContentHeight = 600;
+  const maxContentHeight = 460;
   const date = new Date(link.createdAt);
 
   const toggleContent = () => {

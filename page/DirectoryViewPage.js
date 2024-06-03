@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { View, Text, StyleSheet, ScrollView, Pressable } from "react-native";
 import { React, useState, useCallback } from "react";
 import OuterContainer from "../component/OuterContainer";
 import Header from "../component/Header";
@@ -8,6 +8,9 @@ import { Image } from "expo-image";
 import LinkViewPanel from "../component/LinkViewPanel";
 import { useFocusEffect } from "@react-navigation/native";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
+import AntDesign from "@expo/vector-icons/AntDesign";
+import AddFolderModal from "../component/AddFolderModal";
+import { Entypo } from "@expo/vector-icons";
 
 const dummyData = {
   hierarchy: [
@@ -80,6 +83,7 @@ const DirectoryViewPage = ({ route }) => {
   const [currentDirectory, setCurrentDirectory] = useState("");
   const directory = route.params.directory;
   const axiosPrivate = useAxiosPrivate();
+  const [addFolderModalVisible, setAddFolderModalVisible] = useState(false);
 
   const DIRECTORY_URL = "/directories/" + route.params.directory;
 
@@ -116,6 +120,10 @@ const DirectoryViewPage = ({ route }) => {
     }, [])
   );
 
+  const openAddFolderModal = () => {
+    setAddFolderModalVisible(true);
+  };
+
   return (
     <OuterContainer>
       <ScrollView>
@@ -123,9 +131,22 @@ const DirectoryViewPage = ({ route }) => {
         <Heirarchy hierarchy={[parentName, currentDirectory]} />
         {response.childFoldersName != null && (
           <View>
-            <View style={styles.category}>
-              <Text style={styles.categoryTitle}>폴더</Text>
+            <View style={styles.categoryLabelContainer}>
+              <View style={styles.category}>
+                <Text style={styles.categoryTitle}>폴더</Text>
+              </View>
+              <Pressable
+                style={styles.addFolderButton}
+                onPress={() => setAddFolderModalVisible(true)}
+              >
+                <AntDesign name="plus" size={24} color={darkTheme.text} />
+              </Pressable>
             </View>
+            <AddFolderModal
+              visible={addFolderModalVisible}
+              setInvisible={() => setAddFolderModalVisible(false)}
+              currentFolder={route.params.directory}
+            />
             {response.childFoldersName.length > 0 ? (
               <View>
                 <View style={styles.gridContainer}>
@@ -150,9 +171,12 @@ const DirectoryViewPage = ({ route }) => {
           </View>
         )}
 
-        <View style={styles.category}>
-          <Text style={styles.categoryTitle}>링크</Text>
+        <View style={styles.categoryLabelContainer}>
+          <View style={styles.category}>
+            <Text style={styles.categoryTitle}>링크</Text>
+          </View>
         </View>
+
         <View>
           {links != null &&
             links.map((item, index) => (
@@ -173,14 +197,28 @@ const FolderItem = ({ folder }) => {
       flexDirection: "column",
       margin: 5,
     },
-    image: { width: 110, height: 80, borderRadius: 10, alignSelf: "center" },
+    image: {
+      width: 110,
+      height: 80,
+      borderRadius: 10,
+      alignSelf: "center",
+      alignItems: "center",
+    },
     folderName: { color: darkTheme.text, alignSelf: "center" },
   });
+
   return (
     <View style={styles.container}>
       <Pressable>
-        <Image style={styles.image} source={{ uri: folder.sampleImage }} />
-        <Text style={styles.folderName}>{folder.name}</Text>
+        {folder.sampleImage ? (
+          <Image style={styles.image} source={{ uri: folder.sampleImage }} />
+        ) : (
+          <View style={styles.image}>
+            <Entypo name="folder" size={80} color={darkTheme.text} />
+          </View>
+        )}
+
+        <Text style={styles.folderName}>{folder.directoryName}</Text>
       </Pressable>
     </View>
   );
@@ -209,7 +247,6 @@ const Heirarchy = ({ hierarchy }) => {
       borderBottomColor: darkTheme.level2,
       borderBottomWidth: 2,
     },
-
     mapContainer: {
       flexDirection: "row",
     },
@@ -250,11 +287,20 @@ const styles = StyleSheet.create({
   columnContainer: {
     flex: 1,
   },
+  categoryLabelContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 20,
+  },
+  addFolderButton: {
+    flexDirection: "column",
+    justifyContent: "center",
+  },
   category: {
     height: 40,
-    marginTop: 20,
     padding: 5,
     paddingLeft: 10,
+    height: "100%",
   },
   categoryTitle: {
     fontSize: 20,
