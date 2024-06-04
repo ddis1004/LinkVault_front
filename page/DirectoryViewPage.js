@@ -11,6 +11,8 @@ import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import AddFolderModal from "../component/AddFolderModal";
 import { Entypo } from "@expo/vector-icons";
+import BottomModal from "../component/BottomModal";
+import ConfirmCancelContainer from "../component/ConfirmCancelContainer";
 
 const dummyData = {
   hierarchy: [
@@ -84,6 +86,10 @@ const DirectoryViewPage = ({ route }) => {
   const directory = route.params.directory;
   const axiosPrivate = useAxiosPrivate();
   const [addFolderModalVisible, setAddFolderModalVisible] = useState(false);
+  const [linkModalVisible, setLinkModalVisible] = useState(false);
+  const [folderModalVisible, setFolderModalVisible] = useState(false);
+  const [controlLink, setControlLink] = useState({});
+  const [controlFodler, setControlFolder] = useState({});
 
   const DIRECTORY_URL = "/directories/" + route.params.directory;
 
@@ -124,6 +130,21 @@ const DirectoryViewPage = ({ route }) => {
     setAddFolderModalVisible(true);
   };
 
+  const handleLinkLongPress = (link) => {
+    console.log(link);
+    setControlLink(link);
+    setLinkModalVisible(true);
+  };
+
+  const handleFolderPress = (folder) => {
+    setControlFolder(folder);
+  };
+
+  const handleFolderLongPress = (folder) => {
+    setControlFolder(folder);
+    setFolderModalVisible(true);
+  };
+
   return (
     <OuterContainer>
       <ScrollView>
@@ -151,13 +172,28 @@ const DirectoryViewPage = ({ route }) => {
               <View>
                 <View style={styles.gridContainer}>
                   <View style={styles.columnContainer}>
-                    <GridColumn col={0} folders={response.childFoldersName} />
+                    <GridColumn
+                      col={0}
+                      folders={response.childFoldersName}
+                      onPressItem={handleFolderPress}
+                      onLongPressItem={handleFolderLongPress}
+                    />
                   </View>
                   <View style={styles.columnContainer}>
-                    <GridColumn col={1} folders={response.childFoldersName} />
+                    <GridColumn
+                      col={1}
+                      folders={response.childFoldersName}
+                      onPressItem={handleFolderPress}
+                      onLongPressItem={handleFolderLongPress}
+                    />
                   </View>
                   <View style={styles.columnContainer}>
-                    <GridColumn col={2} folders={response.childFoldersName} />
+                    <GridColumn
+                      col={2}
+                      folders={response.childFoldersName}
+                      onPressItem={handleFolderPress}
+                      onLongPressItem={handleFolderLongPress}
+                    />
                   </View>
                 </View>
               </View>
@@ -180,17 +216,67 @@ const DirectoryViewPage = ({ route }) => {
         <View>
           {links != null &&
             links.map((item, index) => (
-              <LinkViewPanel key={item.id} link={item} />
+              <LinkViewPanel
+                key={item.id}
+                link={item}
+                onLongPress={handleLinkLongPress}
+              />
             ))}
         </View>
       </ScrollView>
+      <BottomModal visible={linkModalVisible}>
+        <View style={styles.folderModalLabel}>
+          <Entypo
+            name="link"
+            size={24}
+            color={"#BBE1FA"}
+            style={{ marginLeft: -24 }}
+          />
+          <Text style={styles.linkButtonText}>{controlLink.title}</Text>
+        </View>
+        <Pressable style={styles.linkControlButton}>
+          <Text style={styles.linkButtonText}>삭제</Text>
+        </Pressable>
+        <Pressable style={styles.linkControlButton}>
+          <Text style={styles.linkButtonText}>이동</Text>
+        </Pressable>
+        <ConfirmCancelContainer
+          cancelVisible={true}
+          onCancel={() => setLinkModalVisible(false)}
+          onConfirm={() => setLinkModalVisible(false)}
+        />
+      </BottomModal>
+      <BottomModal visible={folderModalVisible}>
+        <View style={styles.folderModalLabel}>
+          <Entypo
+            name="folder"
+            size={24}
+            color={darkTheme.highlight}
+            style={{ marginLeft: -24 }}
+          />
+          <Text style={[styles.linkButtonText, { marginLeft: 5 }]}>
+            {controlFodler.directoryName}
+          </Text>
+        </View>
+        <Pressable style={styles.linkControlButton}>
+          <Text style={styles.linkButtonText}>삭제</Text>
+        </Pressable>
+        <Pressable style={styles.linkControlButton}>
+          <Text style={styles.linkButtonText}>이름 변경</Text>
+        </Pressable>
+        <ConfirmCancelContainer
+          cancelVisible={true}
+          onCancel={() => setFolderModalVisible(false)}
+          onConfirm={() => setFolderModalVisible(false)}
+        />
+      </BottomModal>
     </OuterContainer>
   );
 };
 
 export default DirectoryViewPage;
 
-const FolderItem = ({ folder }) => {
+const FolderItem = ({ folder, onPress, onLongPress }) => {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -209,7 +295,10 @@ const FolderItem = ({ folder }) => {
 
   return (
     <View style={styles.container}>
-      <Pressable>
+      <Pressable
+        onPress={() => onPress(folder)}
+        onLongPress={() => onLongPress(folder)}
+      >
         {folder.sampleImage ? (
           <Image style={styles.image} source={{ uri: folder.sampleImage }} />
         ) : (
@@ -217,19 +306,25 @@ const FolderItem = ({ folder }) => {
             <Entypo name="folder" size={80} color={darkTheme.text} />
           </View>
         )}
-
         <Text style={styles.folderName}>{folder.directoryName}</Text>
       </Pressable>
     </View>
   );
 };
 
-const GridColumn = ({ col, folders }) => {
+const GridColumn = ({ col, folders, onPressItem, onLongPressItem }) => {
   return (
     <View>
       {folders.map((item, index) => {
         if (index % 3 == col) {
-          return <FolderItem key={item.link} folder={item} />;
+          return (
+            <FolderItem
+              key={item.link}
+              folder={item}
+              onPress={onPressItem}
+              onLongPress={onLongPressItem}
+            />
+          );
         } else {
           return null;
         }
@@ -306,5 +401,20 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: darkTheme.text,
     fontFamily: "Pretendard",
+  },
+  linkControlButton: {
+    alignItems: "center",
+  },
+  linkButtonText: {
+    color: darkTheme.text,
+    fontFamily: "Pretendard",
+    fontSize: 18,
+    marginVertical: 2,
+    alignSelf: "center",
+    textAlign: "center",
+  },
+  folderModalLabel: {
+    flexDirection: "row",
+    justifyContent: "center",
   },
 });
