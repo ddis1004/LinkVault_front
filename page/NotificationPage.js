@@ -13,6 +13,7 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import { darkTheme } from "../component/ThemeColor";
 import NotificationItem from "../component/NotificationItem";
 import NotificationAddModal from "../component/NotificationAddModal";
+import CenterModalContainer from "../component/CenterModalContainer";
 
 const dummyData = {
   list: [
@@ -171,7 +172,6 @@ const NotificationPage = () => {
             />
           ))}
         </ScrollView>
-        <Text></Text>
       </View>
     </OuterContainer>
   );

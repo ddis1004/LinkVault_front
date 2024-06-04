@@ -6,6 +6,7 @@ import { useFonts } from "expo-font";
 import { darkTheme } from "../component/ThemeColor";
 import axios from "../api/axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Notifications from "expo-notifications";
 
 const LOGIN_URL = "/users/login";
 
@@ -14,6 +15,12 @@ function LoginPage() {
   const [password, setPassword] = useState("");
 
   const navigation = useNavigation();
+
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+    }),
+  });
 
   const buttonHandler = async (e) => {
     try {
@@ -52,7 +59,7 @@ function LoginPage() {
   return (
     <View style={styles.outerContainer}>
       <View style={styles.mainContainer}>
-        <Text style={styles.title}>LinkVault</Text>
+        <Text style={styles.title}>LinkBrary</Text>
         <TextInput
           onChangeText={(text) => setId(text)}
           style={styles.textInput}
@@ -67,6 +74,24 @@ function LoginPage() {
         <Pressable style={styles.button} onPress={buttonHandler}>
           <Text style={styles.buttonText}>로그인</Text>
         </Pressable>
+        {/* <Button
+          title={"saoidfjoaisj"}
+          onPress={async () => {
+            await Notifications.scheduleNotificationAsync({
+              content: {
+                title: "Time's up!",
+                body: "Change sides!",
+                data: {
+                  url: "/test",
+                },
+              },
+              trigger: {
+                seconds: 2, //onPress가 클릭이 되면 60초 뒤에 알람이 발생합니다.
+              },
+            });
+            console.log("noti");
+          }}
+        /> */}
         <View
           style={{
             display: "flex",
