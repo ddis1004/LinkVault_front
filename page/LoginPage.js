@@ -16,12 +16,6 @@ function LoginPage() {
 
   const navigation = useNavigation();
 
-  Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-      shouldShowAlert: true,
-    }),
-  });
-
   const buttonHandler = async (e) => {
     try {
       const response = await axios.post(
@@ -74,24 +68,6 @@ function LoginPage() {
         <Pressable style={styles.button} onPress={buttonHandler}>
           <Text style={styles.buttonText}>로그인</Text>
         </Pressable>
-        {/* <Button
-          title={"saoidfjoaisj"}
-          onPress={async () => {
-            await Notifications.scheduleNotificationAsync({
-              content: {
-                title: "Time's up!",
-                body: "Change sides!",
-                data: {
-                  url: "/test",
-                },
-              },
-              trigger: {
-                seconds: 2, //onPress가 클릭이 되면 60초 뒤에 알람이 발생합니다.
-              },
-            });
-            console.log("noti");
-          }}
-        /> */}
         <View
           style={{
             display: "flex",

@@ -44,10 +44,6 @@ function MainPage() {
   const [response, setResponse] = useState({});
   const axiosPrivate = useAxiosPrivate();
 
-  // axiosPrivate.interceptors.request.use((request) => {
-  //   //console.log(request);
-  // });
-
   useFocusEffect(
     useCallback(() => {
       const fetchData = async () => {

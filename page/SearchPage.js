@@ -13,6 +13,8 @@ import Header from "../component/Header";
 import { darkTheme } from "../component/ThemeColor";
 import { AntDesign } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
+import { useNavigation } from "@react-navigation/native";
 
 const dummyData = {
   searchRecommend: [
@@ -26,16 +28,20 @@ const dummyData = {
   ],
 };
 
+const SEARCH_URI = "/links/search";
+
 const SearchPage = () => {
   const [isFocused, setIsFocused] = useState(false);
   const [dateFrom, setDateFrom] = useState(new Date());
   const [dateTo, setDateTo] = useState(new Date());
-  const [dateMode, setDateMode] = useState("all");
+  const [dateMode, setDateMode] = useState(1);
   const [show, setShow] = useState(false);
   const [pickerMode, setPickerMode] = useState("");
   const [searchText, setSearchText] = useState("");
-  const [searchMode, setSearchMode] = useState("title+content"); //title + content, summary, memo
+  const [searchMode, setSearchMode] = useState(4); //title + content, summary, memo
   const [searchButtonWidth] = useState(new Animated.Value(0));
+  const axiosPrivate = useAxiosPrivate();
+  const navigation = useNavigation();
 
   const PeriodButton = ({ name, text }) => {
     const styles = StyleSheet.create({
@@ -222,10 +228,12 @@ const SearchPage = () => {
       }
     }
   };
+
   const showPicker = (pickerMode) => {
     setPickerMode(pickerMode);
     setShow(true);
   };
+
   const onChangeSearch = (inputText) => {
     setSearchText(inputText);
 
@@ -241,6 +249,40 @@ const SearchPage = () => {
         duration: 500,
         useNativeDriver: false,
       }).start();
+    }
+  };
+
+  const formatDateMessage = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0"); // getMonth() is zero-based, so add 1
+    const day = String(date.getDate()).padStart(2, "0");
+
+    // Format the date as yyyy-MM-dd
+    const formattedDate = `${year}-${month}-${day}`;
+    return formattedDate;
+  };
+
+  const handleSearch = async () => {
+    let mode_int = -1;
+    const params = {
+      mode: searchMode,
+      dateRangeMode: dateMode,
+      search: searchText,
+      startDate: formatDateMessage(dateFrom),
+      endDate: formatDateMessage(dateTo),
+    };
+
+    try {
+      const response = await axiosPrivate.get(SEARCH_URI, {
+        params: params,
+      });
+      console.log(response.data.result);
+      navigation.navigate("SearchResult", {
+        result: response.data.result,
+        keyword: searchText,
+      });
+    } catch (error) {
+      console.log(error.response);
     }
   };
 
@@ -262,7 +304,7 @@ const SearchPage = () => {
           <Animated.View
             style={[styles.searchButtonWrapper, { width: searchButtonWidth }]}
           >
-            <Pressable>
+            <Pressable onPress={() => handleSearch()}>
               <AntDesign name="search1" size={24} color={darkTheme.text} />
             </Pressable>
           </Animated.View>
@@ -272,18 +314,18 @@ const SearchPage = () => {
         <SearchWordsPanel list={dummyData.searchRecommend} /> */}
         <Text style={styles.keywordLabel}>검색 방식</Text>
         <View style={styles.periodButtonPanel}>
-          <SearchModeButton name={"title+content"} text={"제목+내용"} />
-          <SearchModeButton name={"title"} text={"제목"} />
-          <SearchModeButton name={"summary"} text={"요약"} />
-          <SearchModeButton name={"memo"} text={"메모"} />
+          <SearchModeButton name={4} text={"자동"} />
+          <SearchModeButton name={1} text={"제목+내용"} />
+          <SearchModeButton name={2} text={"요약"} />
+          <SearchModeButton name={3} text={"메모"} />
         </View>
 
         <Text style={[styles.keywordLabel, { marginTop: 30 }]}>검색 기간</Text>
         <View style={styles.periodButtonPanel}>
-          <PeriodButton name={"all"} text={"전체"}></PeriodButton>
-          <PeriodButton name={"week"} text={"1주일"}></PeriodButton>
-          <PeriodButton name={"month"} text={"1개월"}></PeriodButton>
-          <PeriodButton name={"custom"} text={"직접 설정"}></PeriodButton>
+          <PeriodButton name={1} text={"전체"}></PeriodButton>
+          <PeriodButton name={2} text={"1주일"}></PeriodButton>
+          <PeriodButton name={3} text={"1개월"}></PeriodButton>
+          <PeriodButton name={4} text={"직접 설정"}></PeriodButton>
         </View>
         {dateMode == "custom" && (
           <View style={styles.datePanel}>

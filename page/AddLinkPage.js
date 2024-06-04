@@ -9,6 +9,7 @@ import CenterModalContainer from "../component/CenterModalContainer";
 import GlobalDirectorySelectPanel from "../component/GlobalDirectorySelectPanel";
 import ConfirmCancelContainer from "../component/ConfirmCancelContainer";
 import { Entypo } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 
 const ADDLINK_URL = "/links/users";
 
@@ -34,6 +35,7 @@ const AddLinkPage = () => {
   ]);
 
   const axiosPrivate = useAxiosPrivate();
+  const navigation = useNavigation();
 
   const handleSubmit = async () => {
     let postContent = {
@@ -41,18 +43,28 @@ const AddLinkPage = () => {
       memo: memo,
       url: link,
       autoFolderSave: true,
+      autoTitleSave: true,
     };
-    if (title.length == 0) postContent.autoTitleSave = true;
+    if (value == "manual") {
+      postContent.autoFolderSave = false;
+      postContent.folderId = selectedFolder.id;
+    }
+    if (title != "") {
+      autoTitleSave = false;
+    }
 
     try {
+      console.log(postContent);
       const response = await axiosPrivate.post(
         ADDLINK_URL,
         JSON.stringify(postContent)
       );
+      console.log(response.data);
     } catch (err) {
-      console.log("add_link_error :");
       console.log(err.response);
     }
+
+    navigation.navigate("Main");
   };
 
   return (

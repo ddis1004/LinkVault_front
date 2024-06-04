@@ -49,8 +49,9 @@ const GloablDirectorySelectPanel = ({ value, onValueChange }) => {
     useCallback(() => {
       const fetchData = async () => {
         try {
-          await setParsedFolder(parseDirectoryString(test_input));
-          //const response = await axiosPrivate.get(DIRECTORY_URL);
+          const response = await axiosPrivate.get(DIRECTORY_URL);
+
+          await setParsedFolder(parseDirectoryString(response.data));
           //console.log(response.data);
         } catch (err) {
           console.log(err);

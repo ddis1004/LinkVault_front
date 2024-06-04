@@ -92,6 +92,7 @@ const DirectoryViewPage = ({ route }) => {
   const [controlFodler, setControlFolder] = useState({});
 
   const DIRECTORY_URL = "/directories/" + route.params.directory;
+  const DELETE_LINK_URL_PREFIX = "/links/users/";
 
   useFocusEffect(
     useCallback(() => {
@@ -106,7 +107,7 @@ const DirectoryViewPage = ({ route }) => {
         }
       };
       fetchData();
-    }, [])
+    }, [directory, controlLink])
   );
 
   useFocusEffect(
@@ -131,7 +132,6 @@ const DirectoryViewPage = ({ route }) => {
   };
 
   const handleLinkLongPress = (link) => {
-    console.log(link);
     setControlLink(link);
     setLinkModalVisible(true);
   };
@@ -143,6 +143,17 @@ const DirectoryViewPage = ({ route }) => {
   const handleFolderLongPress = (folder) => {
     setControlFolder(folder);
     setFolderModalVisible(true);
+  };
+
+  const handleDeleteLink = async (link) => {
+    try {
+      const deleteURL = DELETE_LINK_URL_PREFIX + link.id;
+      await axiosPrivate.delete(deleteURL);
+    } catch (error) {
+      console.log(error.response);
+    }
+    setControlLink(-1);
+    setLinkModalVisible(false);
   };
 
   return (
@@ -234,7 +245,10 @@ const DirectoryViewPage = ({ route }) => {
           />
           <Text style={styles.linkButtonText}>{controlLink.title}</Text>
         </View>
-        <Pressable style={styles.linkControlButton}>
+        <Pressable
+          style={styles.linkControlButton}
+          onPress={() => handleDeleteLink(controlLink)}
+        >
           <Text style={styles.linkButtonText}>삭제</Text>
         </Pressable>
         <Pressable style={styles.linkControlButton}>
