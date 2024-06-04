@@ -18,12 +18,14 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.capstone.linkbrary",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "permissions":
-        ["INTERNET"]
+      "permissions": [
+        "INTERNET"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -32,9 +34,20 @@
       [
         "expo-font",
         {
-          "fonts": ["./assets/fonts/Jalnan.ttf", "./assets/fonts/ONE Mobile Title.ttf", "./assets/fonts/Pretendard-Medium.otf"]
+          "fonts": [
+            "./assets/fonts/Bebas.ttf",
+            "./assets/fonts/Jersy.ttf",
+            "./assets/fonts/NotoSans.ttf",
+            "./assets/fonts/ONEMobile.ttf",
+            "./assets/fonts/Pretendard.otf"
+          ]
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "ef34efa5-ea7a-48ba-8ab1-3fd902334e9f"
+      }
+    }
   }
 }

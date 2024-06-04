@@ -6,6 +6,7 @@ import { darkTheme } from "../component/ThemeColor";
 import { useFocusEffect } from "@react-navigation/native";
 import Slider from "@react-native-community/slider";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
+import { Provider, Menu, IconButton } from "react-native-paper";
 
 const SETTINGS_URL = "/reminders/users";
 
@@ -23,30 +24,59 @@ const AccountPage = () => {
   const [unreadTime, setUnreadTime] = useState(1);
   const [countAlertActive, setCountAlertActive] = useState(false);
   const [timeAlertActive, setTimeAlertActive] = useState(false);
+  const [test, setTest] = useState(2);
 
   const axiosPrivate = useAxiosPrivate();
 
-  // useFocusEffect(
-  //   useCallback(() => {
-  //     const fetchData = async () => {
-  //       try {
-  //         const response = await axiosPrivate.get(SETTINGS_URL);
-  //         console.log(response.result)
-  //       } catch (err) {
-  //         console.log(err.response);
-  //       }
-  //     };
-  //     fetchData();
-  //   }, [])
-  // );
+  const [visible, setVisible] = useState(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      const fetchData = async () => {
+        try {
+          const response = await axiosPrivate.get(SETTINGS_URL);
+          console.log(response);
+        } catch (err) {
+          console.log(err.response);
+        }
+      };
+      fetchData();
+    }, [])
+  );
 
   const handleOpenModal = (mode) => {
     setModalMode(mode);
     setModalOpen(true);
   };
 
+  const handleMove = () => {
+    // Handle move action
+    closeMenu();
+  };
+
+  const handleDelete = () => {
+    // Handle delete action
+    closeMenu();
+  };
+
+  const openMenu = () => setVisible(true);
+  const closeMenu = () => setVisible(false);
+
   const handleSubmitChange = () => {
-    console.log(unreadCount, unreadTime);
+    const data = {
+      unreadTimeAlert: timeAlertActive,
+      unreadAlertTime: `${unreadTime}:00`,
+      unreadFolderAlertCount: unreadCount,
+      unreadFolderAlert: countAlertActive,
+    };
+    //console.log(data);
+    setTest(1);
+    try {
+      const response = axiosPrivate.put(SETTINGS_URL, data);
+      console.log(response);
+    } catch (err) {
+      //console.log(err);
+    }
   };
 
   const handleToggle = (mode) => {
@@ -55,14 +85,13 @@ const AccountPage = () => {
     } else {
       setTimeAlertActive((previousState) => !previousState);
     }
-
     handleSubmitChange();
   };
 
   return (
     <OuterContainer>
       <View style={styles.innerContainer}>
-        <Header title={"내 정보"}></Header>
+        <Header title={"내 정보" + test}></Header>
         <View style={styles.settingTextContainer}>
           <Text style={styles.settingLabel}>알림 설정</Text>
           <View style={styles.settingContainer}>

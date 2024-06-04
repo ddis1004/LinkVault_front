@@ -4,12 +4,18 @@ import { NavigationContainer } from "@react-navigation/native";
 import LoginPage from "../page/LoginPage";
 import SignupPage from "../page/SignupPage";
 import AccountOptionPage from "../page/AccountOptionPage";
+import * as Linking from "expo-linking";
 
 const Stack = createNativeStackNavigator();
 
+const prefix = Linking.createURL("/");
+
 function Navigations() {
+  const linking = {
+    prefixes: [prefix],
+  };
   return (
-    <NavigationContainer style={{ flex: 1 }}>
+    <NavigationContainer style={{ flex: 1 }} linking={linking}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Login" component={LoginPage} />
         <Stack.Screen name="Signup" component={SignupPage} />
