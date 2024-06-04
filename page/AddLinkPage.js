@@ -5,6 +5,10 @@ import { darkTheme } from "../component/ThemeColor";
 import Header from "../component/Header";
 import DropDownPicker from "react-native-dropdown-picker";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
+import CenterModalContainer from "../component/CenterModalContainer";
+import GlobalDirectorySelectPanel from "../component/GlobalDirectorySelectPanel";
+import ConfirmCancelContainer from "../component/ConfirmCancelContainer";
+import { Entypo } from "@expo/vector-icons";
 
 const ADDLINK_URL = "/links/users";
 
@@ -14,6 +18,8 @@ const AddLinkPage = () => {
   const [title, setTitle] = useState("");
   const [memo, setMemo] = useState("");
   const [value, setValue] = useState(null);
+  const [selectedFolder, setSelectedFolder] = useState({});
+  const [folderSelectVisible, setFolderSelectVisible] = useState(false);
   const [items, setItems] = useState([
     {
       label: "자동",
@@ -80,21 +86,53 @@ const AddLinkPage = () => {
         </View>
         <View>
           <Text style={styles.inputLabel}>저장위치</Text>
-          <DropDownPicker
-            open={open}
-            value={value}
-            items={items}
-            setOpen={setOpen}
-            setValue={setValue}
-            setItems={setItems}
-            theme="DARK"
-            placeholder="자동"
-            style={styles.picker}
-          ></DropDownPicker>
-          {/* <Text style={styles.inputComment}>
-            * 미설정시 자동으로 분류됩니다.
-          </Text> */}
+          <View style={{ paddingHorizontal: 15 }}>
+            <DropDownPicker
+              open={open}
+              value={value}
+              items={items}
+              setOpen={setOpen}
+              setValue={setValue}
+              onChangeValue={(value) => {
+                if (value == "manual") setFolderSelectVisible(true);
+                setValue(value);
+              }}
+              setItems={setItems}
+              theme="DARK"
+              placeholder="자동"
+              style={{
+                paddingHorizontal: 10,
+                borderWidth: 0,
+                backgroundColor: darkTheme.level2,
+              }}
+            ></DropDownPicker>
+          </View>
+          {value == "manual" && (
+            <View style={styles.selectedFolderContainer}>
+              <Entypo name="folder" size={16} color={darkTheme.highlight_low} />
+              <Text style={styles.selectedFolderText}>저장 폴더 : </Text>
+              <Text style={styles.selectedFolderText}>
+                {selectedFolder.name}
+              </Text>
+            </View>
+          )}
+          {selectedFolder == null && (
+            <Text style={styles.inputComment}>
+              * 미설정시 자동으로 분류됩니다.
+            </Text>
+          )}
         </View>
+
+        <CenterModalContainer visible={folderSelectVisible}>
+          <GlobalDirectorySelectPanel
+            value={selectedFolder}
+            onValueChange={(directory) => setSelectedFolder(directory)}
+          />
+          <ConfirmCancelContainer
+            onConfirm={() => setFolderSelectVisible(false)}
+          />
+        </CenterModalContainer>
+
         <View style={styles.inputContainer}>
           <Text style={styles.inputLabel}>메모</Text>
           <TextInput
@@ -104,7 +142,7 @@ const AddLinkPage = () => {
             multiline={true}
             textAlignVertical="top"
             placeholder="자유롭게 메모를 작성해주세요"
-          ></TextInput>
+          />
         </View>
         <Pressable style={styles.submitButton} onPress={() => handleSubmit()}>
           <Text style={styles.submitButtonText}>저장</Text>
@@ -151,9 +189,22 @@ const styles = StyleSheet.create({
     height: 180,
   },
   picker: {
-    width: "90%",
     marginLeft: 20,
     backgroundColor: darkTheme.level2,
+  },
+  selectedFolderContainer: {
+    //backgroundColor: darkTheme.level2,
+    flexDirection: "row",
+    marginHorizontal: 15,
+    alignItems: "center",
+    padding: 6,
+    marginVertical: 5,
+    borderRadius: 5,
+  },
+  selectedFolderText: {
+    color: darkTheme.text,
+    fontSize: 16,
+    marginLeft: 10,
   },
   inputComment: {
     marginHorizontal: 20,
