@@ -1,5 +1,5 @@
-import { View, Text, Button, TextInput, Pressable } from "react-native";
-import { React, useState } from "react";
+import { View, Text, Button, TextInput, Pressable} from "react-native";
+import { React, useState, useEffect } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { Dimensions, StyleSheet } from "react-native";
 import { useFonts } from "expo-font";
@@ -13,6 +13,7 @@ const LOGIN_URL = "/users/login";
 function LoginPage() {
   const [id, setId] = useState("");
   const [password, setPassword] = useState("");
+  const [expoPushToken, setExpoPushToken] = useState("");
 
   const navigation = useNavigation();
 
@@ -22,11 +23,15 @@ function LoginPage() {
     }),
   });
 
+  useEffect(() => {
+    registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
+  }, []);
+
   const buttonHandler = async (e) => {
     try {
       const response = await axios.post(
         LOGIN_URL,
-        JSON.stringify({ email: id, password: password }),
+        JSON.stringify({ email: id, password: password, token: expoPushToken }),
         {
           withCredentials: true,
         }
@@ -107,6 +112,27 @@ function LoginPage() {
       </View>
     </View>
   );
+}
+
+async function registerForPushNotificationsAsync() {
+  let token;
+  const { status: existingStatus } = await Notifications.getPermissionsAsync();
+  let finalStatus = existingStatus.status;
+
+  if (existingStatus.status !== 'granted') {
+    const { status } = await Notifications.requestPermissionsAsync();
+    finalStatus = status;
+  }
+
+  if (finalStatus !== 'granted') {
+    alert('Failed to get push token for push notification!');
+    return;
+  }
+
+  token = (await Notifications.getExpoPushTokenAsync()).data;
+  console.log(token);
+  console.log(token.body)
+  return token;
 }
 
 const styles = StyleSheet.create({

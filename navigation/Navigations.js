@@ -5,6 +5,8 @@ import LoginPage from "../page/LoginPage";
 import SignupPage from "../page/SignupPage";
 import AccountOptionPage from "../page/AccountOptionPage";
 import * as Linking from "expo-linking";
+import DirectoryViewPage from "../page/DirectoryViewPage";
+import { navigationRef } from './PushNavigation';
 
 const Stack = createNativeStackNavigator();
 
@@ -20,6 +22,7 @@ function Navigations() {
         <Stack.Screen name="Login" component={LoginPage} />
         <Stack.Screen name="Signup" component={SignupPage} />
         <Stack.Screen style={{ flex: 1 }} name="Main" component={BottomTab} />
+        <Stack.Screen name="DirectoryView" component={DirectoryViewPage} />
       </Stack.Navigator>
     </NavigationContainer>
   );
