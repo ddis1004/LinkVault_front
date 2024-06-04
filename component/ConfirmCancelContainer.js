@@ -6,6 +6,7 @@ const ConfirmCancelContainer = ({
   onCancel,
   onConfirm,
   cancelVisible = false,
+  confirmVisible = true,
 }) => {
   return (
     <View style={styles.container}>
@@ -14,9 +15,11 @@ const ConfirmCancelContainer = ({
           <Text style={styles.buttonText}>취소</Text>
         </Pressable>
       )}
-      <Pressable style={styles.button} onPress={onConfirm}>
-        <Text style={styles.buttonText}>확인</Text>
-      </Pressable>
+      {confirmVisible && (
+        <Pressable style={styles.button} onPress={onConfirm}>
+          <Text style={styles.buttonText}>확인</Text>
+        </Pressable>
+      )}
     </View>
   );
 };

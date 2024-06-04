@@ -10,7 +10,7 @@ import { Image } from "expo-image";
 import { Entypo } from "@expo/vector-icons";
 import { useState, useRef, useEffect } from "react";
 
-const LinkViewPanel = ({ link }) => {
+const LinkViewPanel = ({ link, onLongPress }) => {
   const [isVisible, setVisible] = useState(false);
   const contentHeight = useRef(new Animated.Value(0)).current;
   const maxContentHeight = 460;
@@ -27,7 +27,11 @@ const LinkViewPanel = ({ link }) => {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.header} onPress={toggleContent}>
+      <TouchableOpacity
+        style={styles.header}
+        onPress={toggleContent}
+        onLongPress={() => onLongPress(link)}
+      >
         {link.siteLogo != null ? (
           <Image source={link.siteLogo} style={styles.siteLogo} />
         ) : (
@@ -47,12 +51,12 @@ const LinkViewPanel = ({ link }) => {
             >{`${date.getFullYear()} 년 ${date.getMonth()}월 ${date.getDate()}일 ${date.getHours()}:${date.getMinutes()}`}</Text>
           )}
         </View>
-        <Entypo
+        {/* <Entypo
           style={styles.editIcon}
           name="dots-three-vertical"
           size={20}
           color={darkTheme.text}
-        />
+        /> */}
       </TouchableOpacity>
       <Animated.View style={[styles.content, { height: contentHeight }]}>
         <Image source={link.thumbnail} style={styles.image} />
