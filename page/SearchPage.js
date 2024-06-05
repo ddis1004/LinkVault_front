@@ -13,7 +13,7 @@ import Header from "../component/Header";
 import { darkTheme } from "../component/ThemeColor";
 import { AntDesign } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import useAxiosPrivate from "../hooks/useAxiosPrivate";
+import useAxiosPrivate, { useVecSearchAxios } from "../hooks/useAxiosPrivate";
 import { useNavigation } from "@react-navigation/native";
 
 const dummyData = {
@@ -29,6 +29,7 @@ const dummyData = {
 };
 
 const SEARCH_URI = "/links/search";
+const VEC_SEARCH_URI = "/";
 
 const SearchPage = () => {
   const [isFocused, setIsFocused] = useState(false);
@@ -40,6 +41,8 @@ const SearchPage = () => {
   const [searchText, setSearchText] = useState("");
   const [searchMode, setSearchMode] = useState(4); //title + content, summary, memo
   const [searchButtonWidth] = useState(new Animated.Value(0));
+  const [searchLink, setSearchLink] = useState("");
+  const [searchInputType, setInputType] = useState("normal");
   const axiosPrivate = useAxiosPrivate();
   const navigation = useNavigation();
 
@@ -263,26 +266,29 @@ const SearchPage = () => {
   };
 
   const handleSearch = async () => {
-    let mode_int = -1;
-    const params = {
-      mode: searchMode,
-      dateRangeMode: dateMode,
-      search: searchText,
-      startDate: formatDateMessage(dateFrom),
-      endDate: formatDateMessage(dateTo),
-    };
+    if (searchInputType == "normal") {
+      let mode_int = -1;
+      const params = {
+        mode: searchMode,
+        dateRangeMode: dateMode,
+        search: searchText,
+        startDate: formatDateMessage(dateFrom),
+        endDate: formatDateMessage(dateTo),
+      };
 
-    try {
-      const response = await axiosPrivate.get(SEARCH_URI, {
-        params: params,
-      });
-      console.log(response.data.result);
-      navigation.navigate("SearchResult", {
-        result: response.data.result,
-        keyword: searchText,
-      });
-    } catch (error) {
-      console.log(error.response);
+      try {
+        const response = await axiosPrivate.get(SEARCH_URI, {
+          params: params,
+        });
+        console.log(response.data.result);
+        navigation.navigate("SearchResult", {
+          result: response.data.result,
+          keyword: searchText,
+        });
+      } catch (error) {
+        console.log(error.response);
+      }
+    } else {
     }
   };
 
@@ -290,6 +296,28 @@ const SearchPage = () => {
     <OuterContainer>
       <View style={styles.innerContainer}>
         <Header title={"검색"}></Header>
+        <View style={{ flexDirection: "row", width: "100%" }}>
+          <View
+            style={[
+              styles.inputTypeButtonWrapper,
+              searchInputType == "normal" ? styles.activeInputType : null,
+            ]}
+          >
+            <Pressable onPress={() => setInputType("normal")}>
+              <Text style={styles.buttonText}>일반 검색</Text>
+            </Pressable>
+          </View>
+          <View
+            style={[
+              styles.inputTypeButtonWrapper,
+              searchInputType == "link" ? styles.activeInputType : null,
+            ]}
+          >
+            <Pressable onPress={() => setInputType("link")}>
+              <Text style={styles.buttonText}>링크로 검색</Text>
+            </Pressable>
+          </View>
+        </View>
         <View style={styles.inputPanel}>
           <TextInput
             placeholder="검색어를 입력하세요"
@@ -310,47 +338,55 @@ const SearchPage = () => {
           </Animated.View>
         </View>
 
-        {/* <Text style={styles.keywordLabel}>추천 검색어</Text>
-        <SearchWordsPanel list={dummyData.searchRecommend} /> */}
-        <Text style={styles.keywordLabel}>검색 방식</Text>
-        <View style={styles.periodButtonPanel}>
-          <SearchModeButton name={4} text={"자동"} />
-          <SearchModeButton name={1} text={"제목+내용"} />
-          <SearchModeButton name={2} text={"요약"} />
-          <SearchModeButton name={3} text={"메모"} />
-        </View>
+        {searchInputType == "normal" && (
+          <View>
+            <Text style={styles.keywordLabel}>검색 방식</Text>
+            <View style={styles.periodButtonPanel}>
+              <SearchModeButton name={4} text={"자동"} />
+              <SearchModeButton name={1} text={"제목+내용"} />
+              <SearchModeButton name={2} text={"요약"} />
+              <SearchModeButton name={3} text={"메모"} />
+            </View>
 
-        <Text style={[styles.keywordLabel, { marginTop: 30 }]}>검색 기간</Text>
-        <View style={styles.periodButtonPanel}>
-          <PeriodButton name={1} text={"전체"}></PeriodButton>
-          <PeriodButton name={2} text={"1주일"}></PeriodButton>
-          <PeriodButton name={3} text={"1개월"}></PeriodButton>
-          <PeriodButton name={4} text={"직접 설정"}></PeriodButton>
-        </View>
-        {dateMode == "custom" && (
-          <View style={styles.datePanel}>
-            <Pressable
-              style={styles.dateButton}
-              onPress={() => showPicker("from")}
-            >
-              <Text style={styles.dateButtonText}>{formatDate(dateFrom)}</Text>
-            </Pressable>
-            <Text style={[styles.dateButtonText, { alignSelf: "center" }]}>
-              ~
+            <Text style={[styles.keywordLabel, { marginTop: 30 }]}>
+              검색 기간
             </Text>
-            <Pressable
-              style={styles.dateButton}
-              onPress={() => showPicker("to")}
-            >
-              <Text style={styles.dateButtonText}>{formatDate(dateTo)}</Text>
-            </Pressable>
+            <View style={styles.periodButtonPanel}>
+              <PeriodButton name={1} text={"전체"}></PeriodButton>
+              <PeriodButton name={2} text={"1주일"}></PeriodButton>
+              <PeriodButton name={3} text={"1개월"}></PeriodButton>
+              <PeriodButton name={4} text={"직접 설정"}></PeriodButton>
+            </View>
+            {dateMode == "custom" && (
+              <View style={styles.datePanel}>
+                <Pressable
+                  style={styles.dateButton}
+                  onPress={() => showPicker("from")}
+                >
+                  <Text style={styles.dateButtonText}>
+                    {formatDate(dateFrom)}
+                  </Text>
+                </Pressable>
+                <Text style={[styles.dateButtonText, { alignSelf: "center" }]}>
+                  ~
+                </Text>
+                <Pressable
+                  style={styles.dateButton}
+                  onPress={() => showPicker("to")}
+                >
+                  <Text style={styles.dateButtonText}>
+                    {formatDate(dateTo)}
+                  </Text>
+                </Pressable>
 
-            {show && (
-              <DateTimePicker
-                value={pickerMode === "from" ? dateFrom : dateTo}
-                mode={"date"}
-                onChange={onChange}
-              />
+                {show && (
+                  <DateTimePicker
+                    value={pickerMode === "from" ? dateFrom : dateTo}
+                    mode={"date"}
+                    onChange={onChange}
+                  />
+                )}
+              </View>
             )}
           </View>
         )}
@@ -379,6 +415,24 @@ const styles = StyleSheet.create({
     fontFamily: "Pretendard",
     color: darkTheme.text,
     borderRadius: 14,
+    alignSelf: "center",
+  },
+  inputTypeButtonWrapper: {
+    flex: 1,
+    justifyContent: "center",
+    marginHorizontal: 0,
+  },
+  activeInputType: {
+    borderRadius: 5,
+    borderBottomWidth: 5,
+    borderColor: darkTheme.highlight,
+  },
+  inputTypeButton: { backgroundColor: "red" },
+  buttonText: {
+    fontFamily: "Pretendard",
+    fontSize: 18,
+    color: darkTheme.text,
+
     alignSelf: "center",
   },
   searchButtonWrapper: {
