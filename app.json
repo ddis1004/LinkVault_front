@@ -19,6 +19,7 @@
     },
     "android": {
       "package": "com.capstone.linkbrary",
+      "hermesEnabled": true,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
