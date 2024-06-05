@@ -1,4 +1,4 @@
-import { View, Text, Button, TextInput, Pressable} from "react-native";
+import { View, Text, Button, TextInput, Pressable } from "react-native";
 import { React, useState, useEffect } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { Dimensions, StyleSheet } from "react-native";
@@ -18,8 +18,16 @@ function LoginPage() {
   const navigation = useNavigation();
 
   useEffect(() => {
-    registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
+    const getToken = async () => {
+      const token = await registerForPushNotificationsAsync();
+      //console.log(token);
+    };
+    getToken();
   }, []);
+
+  useEffect(() => {
+    console.log(expoPushToken);
+  }, [expoPushToken]);
 
   const buttonHandler = async (e) => {
     try {
@@ -92,22 +100,30 @@ function LoginPage() {
 
 async function registerForPushNotificationsAsync() {
   let token;
-  const { status: existingStatus } = await Notifications.getPermissionsAsync();
-  let finalStatus = existingStatus.status;
 
-  if (existingStatus.status !== 'granted') {
-    const { status } = await Notifications.requestPermissionsAsync();
-    finalStatus = status;
+  if (typeof Constants.isDevice === "undefined") {
+    Constants.isDevice = Platform.OS !== "web";
   }
 
-  if (finalStatus !== 'granted') {
-    alert('Failed to get push token for push notification!');
-    return;
-  }
+  if (Constants.isDevice) {
+    const { status: existingStatus } =
+      await Notifications.getPermissionsAsync();
+    let finalStatus = existingStatus;
 
-  token = (await Notifications.getExpoPushTokenAsync()).data;
-  console.log(token);
-  console.log(token.body)
+    if (existingStatus !== "granted") {
+      const { status } = await Notifications.requestPermissionsAsync();
+      finalStatus = status;
+    }
+
+    if (finalStatus !== "granted") {
+      alert("Failed to get push token for push notification!");
+      return;
+    }
+
+    token = (await Notifications.getExpoPushTokenAsync()).data;
+  } else {
+    alert("Must use physical device for Push Notifications");
+  }
   return token;
 }
 

@@ -1,13 +1,15 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from "react";
 import { StatusBar } from "expo-status-bar";
 import { Dimensions, StyleSheet, View, Platform, Alert } from "react-native";
 import Navigations from "./navigation/Navigations";
-import * as Font from 'expo-font';
-import * as SplashScreen from 'expo-splash-screen';
-import Constants from 'expo-constants';
+import * as Font from "expo-font";
+import * as SplashScreen from "expo-splash-screen";
+import Constants from "expo-constants";
 import * as Notifications from "expo-notifications";
-import { createStackNavigator } from '@react-navigation/stack';
-import { navigationRef } from './navigation/PushNavigation';
+import { createStackNavigator } from "@react-navigation/stack";
+import { navigationRef } from "./navigation/PushNavigation";
+import { useShareIntent } from "expo-share-intent";
+import { ShareIntentProvider, useShareIntentContext } from "expo-share-intent";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -19,76 +21,84 @@ Notifications.setNotificationHandler({
 
 async function registerForPushNotificationsAsync() {
   let token;
-  if (typeof Constants.isDevice === 'undefined') {
-    Constants.isDevice = Platform.OS !== 'web';
+  if (typeof Constants.isDevice === "undefined") {
+    Constants.isDevice = Platform.OS !== "web";
   }
 
   if (Constants.isDevice) {
-    const { status: existingStatus } = await Notifications.getPermissionsAsync();
+    const { status: existingStatus } =
+      await Notifications.getPermissionsAsync();
     let finalStatus = existingStatus;
 
-    if (existingStatus !== 'granted') {
+    if (existingStatus !== "granted") {
       const { status } = await Notifications.requestPermissionsAsync();
       finalStatus = status;
     }
 
-    if (finalStatus !== 'granted') {
-      alert('Failed to get push token for push notification!');
+    if (finalStatus !== "granted") {
+      alert("Failed to get push token for push notification!");
       return;
     }
 
-    token = (await Notifications.getExpoPushTokenAsync()).data;
-  } else {
-    alert('Must use physical device for Push Notifications');
-  }
+    if (Platform.OS == "a//ndroid") {
+      await Notifications.setNotificationChannelAsync("default", {
+        name: "default",
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: "#FF231F7C",
+      });
 
-  if (Platform.OS === 'android') {
-    Notifications.setNotificationChannelAsync('default', {
-      name: 'default',
-      importance: Notifications.AndroidImportance.MAX,
-      vibrationPattern: [0, 250, 250, 250],
-      lightColor: '#FF231F7C',
-    });
+      token = (await Notifications.getExpoPushTokenAsync()).data;
+    } else {
+      alert("Must use physical device for Push Notifications");
+    }
   }
 
   return token;
 }
-
 const Stack = createStackNavigator();
 
 export default function App() {
   const [isFontLoaded, setIsFontLoaded] = useState(false);
-  const [expoPushToken, setExpoPushToken] = useState('');
+  // const [expoPushToken, setExpoPushToken] = useState("");
   const notificationListener = useRef();
   const responseListener = useRef();
+  const { hasShareIntent, shareIntent, resetShareIntent, error } =
+    useShareIntent();
 
   useEffect(() => {
     loadFonts();
-    registerForPushNotificationsAsync().then(token => {
-      if (token) {
-        setExpoPushToken(token);
-      }
-    }).catch(err => console.log('Error in getting push token:', err));
+    registerForPushNotificationsAsync()
+      .then((token) => {
+        if (token) {
+          setExpoPushToken(token);
+        }
+      })
+      .catch((err) => console.log("Error in getting push token:", err));
 
-    notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
-      console.log(notification);
-    });
+    notificationListener.current =
+      Notifications.addNotificationReceivedListener((notification) => {
+        console.log(notification);
+      });
 
-    responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
-      const data = response.notification.request.content.data;
-      console.log(data);
-      if (data && data.directory) {
-        navigationRef.current?.navigate('DirectoryView', { directory: data.directory });
-      }
-    });
-    return
+    responseListener.current =
+      Notifications.addNotificationResponseReceivedListener((response) => {
+        const data = response.notification.request.content.data;
+        console.log(data);
+        if (data && data.directory) {
+          navigationRef.current?.navigate("DirectoryView", {
+            directory: data.directory,
+          });
+        }
+      });
+    return;
   }, []);
 
   const loadFonts = async () => {
     try {
       await Font.loadAsync({
-        'Pretendard': require('./assets/fonts/Pretendard.otf'),
-        'Bebas': require('./assets/fonts/Bebas.ttf'),
+        Pretendard: require("./assets/fonts/Pretendard.otf"),
+        Bebas: require("./assets/fonts/Bebas.ttf"),
       });
       setIsFontLoaded(true);
       await SplashScreen.hideAsync();
@@ -98,19 +108,21 @@ export default function App() {
   };
 
   if (!isFontLoaded) {
-    return null; 
+    return null;
   }
 
   return (
-    <View style={styles.container}>
-      <StatusBar
-        style="auto"
-        backgroundColor="white"
-        barStyle="light-content"
-        translucent={false}
-      />
-      <Navigations />
-    </View>
+    <ShareIntentProvider>
+      <View style={styles.container}>
+        <StatusBar
+          style="auto"
+          backgroundColor="white"
+          barStyle="light-content"
+          translucent={false}
+        />
+        <Navigations />
+      </View>
+    </ShareIntentProvider>
   );
 }
 
@@ -120,9 +132,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
   },
   bebasText: {
-    fontFamily: 'Bebas', 
+    fontFamily: "Bebas",
   },
   pretendardText: {
-    fontFamily: 'Pretendard',
-  }
+    fontFamily: "Pretendard",
+  },
 });

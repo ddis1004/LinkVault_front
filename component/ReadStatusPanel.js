@@ -21,17 +21,17 @@ const ReadStatusPanel = ({ data, total, read }) => {
     <View style={styles.container}>
       <Text style={styles.text}>{total}개의 링크를 저장했어요</Text>
       <Text style={styles.text}>{read}개를 읽었어요</Text>
-      <Progress.Bar
-        style={styles.progressBar}
-        progress={progress}
-        color={darkTheme.highlight}
-        width={310}
-        height={20}
-        borderRadius={10}
-        unfilledColor={"#AB751C"}
-        animationType="timing" // Specify animation type
-        animated={true}
-      />
+      {/* <Progress.Bar
+          style={styles.progressBar}
+          progress={progress}
+          color={darkTheme.highlight}
+          width={310}
+          height={20}
+          borderRadius={10}
+          unfilledColor={"#AB751C"}
+          animationType="timing" // Specify animation type
+          animated={true}
+        /> */}
     </View>
   );
 };

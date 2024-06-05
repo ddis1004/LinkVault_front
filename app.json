@@ -5,6 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
+    "scheme": "linkbrary",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
@@ -20,18 +21,37 @@
     "android": {
       "package": "com.capstone.linkbrary",
       "hermesEnabled": true,
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "data": [
+            {
+              "scheme": "linkbrary"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
       "permissions": [
-        "INTERNET"
+        "INTERNET", "NOTIFICATIONS", "RECEIVE_BOOT_COMPLETED"
       ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
+    "scripts": {
+      "postinstall": "patch-package"
+    },
     "plugins": [
+      ["expo-notifications",
+        {"icon":"./assets/notificationIcon.png"}
+      ],
+      
+      "expo-share-intent",
       [
         "expo-font",
         {
