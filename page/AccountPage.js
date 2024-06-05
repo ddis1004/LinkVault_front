@@ -35,7 +35,7 @@ const AccountPage = () => {
       const fetchData = async () => {
         try {
           const response = await axiosPrivate.get(SETTINGS_URL);
-          console.log(response);
+          console.log(response.data);
         } catch (err) {
           console.log(err.response);
         }

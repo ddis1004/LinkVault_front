@@ -1,25 +1,37 @@
 import { View, Text, Modal, StyleSheet, Pressable } from "react-native";
-import { React, useState } from "react";
+import { React, useState, useCallback } from "react";
 import { darkTheme } from "./ThemeColor";
 import DirectoryPanel from "./DirectoryView";
 import Entypo from "@expo/vector-icons/Entypo";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
+import ConfirmCancelContainer from "./ConfirmCancelContainer";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
+import GlobalDirectorySelectPanel from "./GlobalDirectorySelectPanel";
+import { useFocusEffect } from "@react-navigation/native";
 
-const TimeSelectPanel = ({ setTime, setDays }) => {
+const LINK_NOTIFICATION_URL = "/reminders/links";
+const FOLDER_NOTIFICATION_URL = "/reminders/directories";
+
+export const TimeSelectPanel = ({
+  initialTime = new Date(),
+  initialDays = [],
+  onTimeChange,
+  onDayChange,
+}) => {
   const [pickerOpen, setPickerOpen] = useState(false);
-  const [time, setTimeView] = useState(new Date());
-  const [activeDays, setActiveDays] = useState([
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-  ]);
+  const [time, setTime] = useState(initialTime);
+  const [activeDays, setActiveDays] = useState(initialDays);
 
   const daysText = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const days = [
+    "SUNDAY",
+    "MONDAY",
+    "TUESDAY",
+    "WEDNESDAY",
+    "THURSDAY",
+    "FRIDAY",
+    "SATURDAY",
+  ];
 
   const styles = StyleSheet.create({
     container: {
@@ -60,16 +72,49 @@ const TimeSelectPanel = ({ setTime, setDays }) => {
       alignSelf: "center",
     },
   });
-  const toggleDay = (index) => {
+  const toggleDay = async (index) => {
     const newDays = [...activeDays];
-    newDays[index] = !newDays[index];
-    setActiveDays(newDays);
-    setDays(newDays);
+    const day = days[index];
+    for (i in activeDays) {
+      if (newDays[i] == day) {
+        newDays.splice(i, 1);
+        await setActiveDays(newDays);
+        onDayChange(activeDays);
+        return;
+      }
+    }
+    newDays.push(day);
+    await setActiveDays(newDays);
+    onDayChange(activeDays);
   };
-  const timeChange = (event, selectedTime) => {
+
+  const int2digit = (n) => {
+    if (n == 0) {
+      return "00";
+    } else if (n > 0 && n < 10) {
+      return "0" + n;
+    } else {
+      return "" + n;
+    }
+  };
+
+  const dateToString = (date) => {
+    const hour = date.getHours();
+    const minute = date.getMinutes();
+    return `${int2digit(hour)}:${int2digit(minute)}:00:00`;
+  };
+  const handleTimeChange = (event, selectedDate) => {
     setPickerOpen(false);
-    setTimeView(selectedTime);
-    setTime(selectedTime);
+    console.log(event);
+    setTime(selectedDate);
+    onTimeChange(dateToString(selectedDate));
+  };
+  const isDayActive = (index) => {
+    const day = days[index];
+    for (d of activeDays) {
+      if (day == d) return true;
+    }
+    return false;
   };
 
   return (
@@ -86,7 +131,9 @@ const TimeSelectPanel = ({ setTime, setDays }) => {
       <View style={styles.dayContainer}>
         {daysText.map((day, index) => (
           <Pressable key={index} onPress={() => toggleDay(index)}>
-            <Text style={activeDays[index] ? styles.activeDay : styles.dayText}>
+            <Text
+              style={isDayActive(index) ? styles.activeDay : styles.dayText}
+            >
               {day}
             </Text>
           </Pressable>
@@ -99,29 +146,61 @@ const TimeSelectPanel = ({ setTime, setDays }) => {
           display="spinner"
           mode={"time"}
           is24Hour={true}
-          onChange={timeChange}
+          onChange={handleTimeChange}
         />
       )}
     </View>
   );
 };
 
-const LinkSelectPanel = ({ links, handleLinkClick }) => {
+const LinkSelectPanel = ({ onChangeLink, folder_id }) => {
   const styles = StyleSheet.create({
     text: {
       fontFamily: "Pretendard",
       fontSize: 16,
       color: darkTheme.text,
-      marginBottom: 30,
       marginLeft: 10,
+      width: "85%",
     },
     container: {
-      marginBottom: 20,
+      paddingLeft: -10,
+    },
+    nameContainer: {
+      flexDirection: "row",
+      marginVertical: 10,
+      padding: 5,
+      borderRadius: 10,
+      flex: 0,
     },
     pressable: {
       flexDirection: "row",
     },
   });
+
+  const [links, setLinks] = useState([]);
+  const [selectedLink, setSelectedLink] = useState(-1);
+
+  const axiosPrivate = useAxiosPrivate();
+
+  const handleLinkClick = (item) => {
+    setSelectedLink(item.id);
+    onChangeLink(item.id);
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      const fetchData = async () => {
+        try {
+          const DIRECTORY_URL = `/directories/${folder_id}`;
+          const response = await axiosPrivate.get(DIRECTORY_URL);
+          setLinks(response.data.result.userLinks);
+        } catch (err) {
+          console.log(err);
+        }
+      };
+      fetchData();
+    }, [])
+  );
 
   if (!links) {
     return (
@@ -139,72 +218,224 @@ const LinkSelectPanel = ({ links, handleLinkClick }) => {
         <Pressable
           style={styles.pressable}
           key={index}
-          onPress={() => handleLinkClick(item.title)}
+          onPress={() => handleLinkClick(item)}
         >
-          <Entypo name="link" size={20} color="#BBE1FA" />
-          <Text style={styles.text}>{item.title}</Text>
+          <View
+            style={[
+              styles.nameContainer,
+              selectedLink == item.id
+                ? { backgroundColor: darkTheme.level1, borderRadius: 10 }
+                : null,
+            ]}
+          >
+            <Entypo name="link" size={20} color="#BBE1FA" />
+            <Text numberOfLines={1} ellipsizeMode={"tail"} style={styles.text}>
+              {item.title}
+            </Text>
+          </View>
         </Pressable>
       ))}
     </View>
   );
 };
 
-const NotificationAddModal = ({
-  directory,
-  setLink,
-  setTime,
-  setDays,
-  visible,
-  setInvisible,
-  getLink,
-}) => {
-  const [step, setStep] = useState("directory");
-  const [links, setLinks] = useState([]);
+const LinkSelectMode = ({ setInvisible, setMode }) => {
+  const [step, setStep] = useState("folder");
+  const [confirmVisible, setConfirmVisible] = useState(false);
+  const [folder, setFolder] = useState(-1);
+  const [days, setDays] = useState([]);
+  const [time, setTime] = useState("00:00");
+  const [link, setLink] = useState(-1);
 
+  const axiosPrivate = useAxiosPrivate();
   const handleCancel = () => {
-    setStep("directory");
+    setMode("select");
     setInvisible();
   };
+  const handleSubmit = async () => {
+    const message = {
+      id: link,
+      onoff: true,
+      reminderTime: time.slice(0, 5),
+      reminderDays: days,
+    };
+    console.log(message);
+    try {
+      const response = await axiosPrivate.post(
+        LINK_NOTIFICATION_URL,
+        JSON.stringify(message)
+      );
+      console.log(response.data);
+    } catch (error) {
+      console.log(error.response);
+    }
+  };
+  const handleNextStep = () => {
+    if (step == "folder") {
+      if (folder.id > 0) {
+        setStep("link");
+      }
+    } else if (step == "link") {
+      if (link > 0) {
+        setStep("time");
+        setConfirmVisible(true);
+      }
+    }
+  };
+  return (
+    <View>
+      {step == "folder" ? (
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <GlobalDirectorySelectPanel
+            value={folder}
+            onValueChange={(value) => setFolder(value)}
+          />
+          <Pressable onPress={() => handleNextStep()}>
+            <Entypo name="chevron-right" size={30} color={darkTheme.text} />
+          </Pressable>
+        </View>
+      ) : step == "link" ? (
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <LinkSelectPanel
+            folder_id={folder.id}
+            onChangeLink={(id) => setLink(id)}
+          />
+          <Pressable onPress={() => handleNextStep()}>
+            <Entypo name="chevron-right" size={30} color={darkTheme.text} />
+          </Pressable>
+        </View>
+      ) : (
+        <TimeSelectPanel
+          onDayChange={(days) => setDays(days)}
+          onTimeChange={(time) => setTime(time)}
+        />
+      )}
+      <ConfirmCancelContainer
+        cancelVisible={true}
+        confirmVisible={confirmVisible}
+        onCancel={() => handleCancel()}
+        onConfirm={() => handleSubmit()}
+      />
+    </View>
+  );
+};
 
-  const handleDirectoryClick = (name) => {
-    const linkList = getLink(name);
-    setLinks(linkList);
-    setStep("link");
+const FolderSelectMode = ({ setInvisible, setMode }) => {
+  const [step, setStep] = useState("folder");
+  const [confirmVisible, setConfirmVisible] = useState(false);
+  const [folder, setFolder] = useState(-1);
+  const [days, setDays] = useState([]);
+  const [time, setTime] = useState("00:00");
+
+  const axiosPrivate = useAxiosPrivate();
+
+  const handleSubmit = async () => {
+    const message = {
+      id: folder.id,
+      onoff: true,
+      reminderTime: time.slice(0, 5),
+      reminderDays: days,
+    };
+    if (days.length > 0) {
+      setMode("select");
+      setInvisible();
+      try {
+        const response = await axiosPrivate.post(
+          FOLDER_NOTIFICATION_URL,
+          JSON.stringify(message)
+        );
+        console.log(response.data);
+      } catch (error) {
+        console.log(error.response);
+      }
+    }
+  };
+  const handleCancel = () => {
+    setMode("select");
+    setInvisible();
+  };
+  const handleNextStep = () => {
+    if (folder.id > 0) {
+      setStep("time");
+      setConfirmVisible(true);
+    }
   };
 
-  const handleLinkClick = (id) => {
-    setStep("time");
-    setLink(id);
-  };
+  return (
+    <View>
+      {step == "folder" ? (
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <GlobalDirectorySelectPanel
+            value={folder}
+            onValueChange={(value) => setFolder(value)}
+          />
+          <Pressable onPress={() => handleNextStep()}>
+            <Entypo name="chevron-right" size={30} color={darkTheme.text} />
+          </Pressable>
+        </View>
+      ) : (
+        <TimeSelectPanel
+          onDayChange={(days) => setDays(days)}
+          onTimeChange={(time) => setTime(time)}
+        />
+      )}
+      <ConfirmCancelContainer
+        cancelVisible={true}
+        confirmVisible={confirmVisible}
+        onCancel={() => handleCancel()}
+        onConfirm={() => handleSubmit()}
+      />
+    </View>
+  );
+};
+
+const NotificationAddModal = ({ visible, setInvisible, getLink }) => {
+  const [mode, setMode] = useState("select");
+  const axiosPrivate = useAxiosPrivate();
+
+  const localStyle = StyleSheet.create({
+    modeSelectContainer: {
+      flexDirection: "row",
+      justifyContent: "center",
+    },
+  });
 
   return (
     <Modal visible={visible} transparent={true} animationType="slide">
       <View style={styles.modalContainer}>
         <View style={styles.modalView}>
-          {step == "directory" ? (
-            <DirectoryPanel
-              directories={directory}
-              handleFolderClick={handleDirectoryClick}
-            />
-          ) : step == "link" ? (
-            <LinkSelectPanel links={links} handleLinkClick={handleLinkClick} />
-          ) : (
-            <TimeSelectPanel setTime={setTime} setDays={setDays} />
-          )}
-
-          <View style={styles.buttonContainer}>
-            <Pressable
-              style={styles.closeButton}
-              onPress={() => handleCancel()}
-            >
-              <Text style={styles.buttonText}>취소</Text>
-            </Pressable>
-            {step == "time" && (
-              <Pressable style={styles.closeButton}>
-                <Text style={styles.buttonText}>확인</Text>
+          {mode == "select" ? (
+            <View style={localStyle.modeSelectContainer}>
+              <Pressable
+                onPress={() => setMode("link")}
+                style={{ marginHorizontal: 20 }}
+              >
+                <Entypo name="link" size={50} color={"#BBE1FA"} />
+                <Text style={styles.buttonText}>링크 알림</Text>
               </Pressable>
-            )}
-          </View>
+              <Pressable
+                onPress={() => setMode("folder")}
+                style={{ marginHorizontal: 20 }}
+              >
+                <Entypo
+                  name="folder"
+                  size={50}
+                  color={darkTheme.highlight_low}
+                />
+                <Text style={styles.buttonText}>폴더 알림</Text>
+              </Pressable>
+            </View>
+          ) : mode == "link" ? (
+            <LinkSelectMode setInvisible={setInvisible} setMode={setMode} />
+          ) : (
+            <FolderSelectMode setInvisible={setInvisible} setMode={setMode} />
+          )}
         </View>
       </View>
     </Modal>

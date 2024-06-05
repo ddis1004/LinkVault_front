@@ -8,6 +8,7 @@ import AddLinkPage from "../page/AddLinkPage";
 import SearchPage from "../page/SearchPage";
 import AccountPage from "../page/AccountPage";
 import NotificationPage from "../page/NotificationPage";
+import SearchNavigation from "./SearchNavigation";
 
 const Tab = createBottomTabNavigator();
 
@@ -85,7 +86,7 @@ const BottomTab = () => {
       />
       <Tab.Screen
         name="Notification"
-        component={SearchPage}
+        component={SearchNavigation}
         options={{
           title: "검색",
           tabBarIcon: ({ focused }) => (

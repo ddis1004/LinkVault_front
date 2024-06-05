@@ -1,33 +1,18 @@
 import { View, Text, StyleSheet, Pressable } from "react-native";
-import React from "react";
+import React, { useState } from "react";
 import { darkTheme } from "./ThemeColor";
 import { Entypo } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
 
-// data format
-// {id: 1,
-//     active: true,
-//     notiType: "periodic",
-//     targetType: "folder",
-//     target: {
-//       title: "발표 못하는 사람이 발표 잘하는 것처럼 보이는 법",
-//       location: ["회의", "발표"],
-//     },
-//     time: {
-//       period: "week",
-//       every: "monday",
-//       hour: 8,
-//       minute: 30,
-//     },
-// }
-
-const Label = ({ data }) => {
+export const Label = ({ data, type }) => {
   let component;
 
   const styles = StyleSheet.create({
     labelContainer: {
       flexDirection: "row",
       alignItems: "center",
+      paddingRight: 40,
     },
     text: {
       marginLeft: 3,
@@ -44,12 +29,14 @@ const Label = ({ data }) => {
     return str.slice(2);
   };
 
-  switch (data.targetType) {
+  switch (type) {
     case "folder":
       component = (
         <View style={styles.labelContainer}>
           <Entypo name="folder" size={16} color={darkTheme.highlight_low} />
-          <Text style={styles.text}>{folderString(data.target.location)}</Text>
+          <Text numberOfLines={1} style={styles.text} ellipsizeMode="tail">
+            {folderString(data.target.location)}
+          </Text>
         </View>
       );
       break;
@@ -57,7 +44,9 @@ const Label = ({ data }) => {
       component = (
         <View style={styles.labelContainer}>
           <Entypo name="link" size={16} color="#BBE1FA" />
-          <Text style={styles.text}>{data.target.title}</Text>
+          <Text numberOfLines={1} style={styles.text} ellipsizeMode="tail">
+            {data.title}
+          </Text>
         </View>
       );
       break;
@@ -65,7 +54,7 @@ const Label = ({ data }) => {
   return component;
 };
 
-const TimePanel = ({ time }) => {
+export const TimePanel = ({ time }) => {
   const styles = StyleSheet.create({
     text: {
       color: darkTheme.text,
@@ -76,17 +65,13 @@ const TimePanel = ({ time }) => {
     },
   });
 
-  const to2Digit = (i) => {
-    if (i == 0) {
-      return "00";
-    } else if (i < 10) {
-      return "0" + i.toString();
-    } else {
-      return i.toString();
-    }
+  const pasrseToTimeString = (time) => {
+    const hour = time.slice(0, 2);
+    const minute = time.slice(3, 5);
+    return hour + " : " + minute;
   };
 
-  const timeString = to2Digit(time.hour) + " : " + to2Digit(time.minute);
+  const timeString = pasrseToTimeString(time);
 
   return (
     <View>
@@ -120,11 +105,11 @@ const AccumulationPanel = ({ accumulation }) => {
   );
 };
 
-const ToggleButton = ({ onToggle, active }) => {
+const ToggleButton = ({ onToggle, active, data }) => {
   const activeColor = darkTheme.highlight;
   const inactiveColor = "#262421";
   return (
-    <Pressable onPress={onToggle}>
+    <Pressable onPress={() => onToggle(data.id, data.type, !active)}>
       <Ionicons
         name="notifications-sharp"
         size={24}
@@ -134,9 +119,18 @@ const ToggleButton = ({ onToggle, active }) => {
   );
 };
 
-const WeekPanel = ({ time }) => {
-  const days = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
-  const currentDay = time.every.toUpperCase().substring(0, 3);
+export const WeekPanel = ({ reminderDate }) => {
+  const daysText = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+  const daysInputFormat = [
+    "SUNDAY",
+    "MONDAY",
+    "TUESDAY",
+    "WEDNESDAY",
+    "THURSDAY",
+    "FRIDAY",
+    "SATURDAY",
+  ];
+  //const currentDay = time.every.toUpperCase().substring(0, 3);
 
   const styles = StyleSheet.create({
     container: {
@@ -154,12 +148,23 @@ const WeekPanel = ({ time }) => {
     },
   });
 
+  const isActive = (day) => {
+    for (d of reminderDate) {
+      if (d == day) {
+        return true;
+      }
+    }
+    return false;
+  };
+
   return (
     <View style={styles.container}>
-      {days.map((day, index) => (
+      {daysText.map((day, index) => (
         <Text
           key={index}
-          style={day === currentDay ? styles.highlight : styles.text}
+          style={
+            isActive(daysInputFormat[index]) ? styles.highlight : styles.text
+          }
         >
           {day}
         </Text>
@@ -168,7 +173,7 @@ const WeekPanel = ({ time }) => {
   );
 };
 
-const DatePanel = ({ time, periodic }) => {
+const DatePanel = ({ time }) => {
   const styles = StyleSheet.create({
     container: {
       flexDirection: "row",
@@ -201,35 +206,19 @@ const DatePanel = ({ time, periodic }) => {
   }
 };
 
-const NotificationItem = ({ data, onToggle, onChange }) => {
+const LINK_CONTENT_URL = "";
+const NotificationItem = ({ data, onToggle }) => {
+  const axiosPrivate = useAxiosPrivate();
+  const [name, setName] = useState("");
+
   return (
     <View style={styles.container}>
-      <Label data={data} />
+      <Label data={data} type={data.type} />
       <View style={styles.timeToggleContainer}>
-        {data.notiType == "periodic" || data.notiType == "one-time" ? (
-          <TimePanel time={data.time} />
-        ) : (
-          <AccumulationPanel accumulation={data.accumulation} />
-        )}
-        <ToggleButton onToggle={onToggle} active={data.active} />
+        <TimePanel time={data.reminderTime} />
+        <ToggleButton onToggle={onToggle} active={data.Onoff} data={data} />
       </View>
-      <View style={styles.dayDate}>
-        {data.notiType == "accumulation" ? (
-          <View>
-            <Text
-              style={styles.text}
-            >{`미확인 된 링크가 ${data.accumulation.threshold}개 쌓이면 알려드려요`}</Text>
-          </View>
-        ) : data.notiType == "periodic" ? (
-          data.time.period == "week" ? (
-            <WeekPanel time={data.time} />
-          ) : (
-            <DatePanel time={data.time} periodic={true} />
-          )
-        ) : (
-          <DatePanel time={data.time} periodic={false} />
-        )}
-      </View>
+      <WeekPanel reminderDate={data.reminderDate} />
     </View>
   );
 };
@@ -238,7 +227,7 @@ const styles = StyleSheet.create({
   container: {
     borderRadius: 15,
     backgroundColor: darkTheme.level2,
-    height: 120,
+    height: 130,
     marginVertical: 10,
     padding: 14,
     justifyContent: "space-between",

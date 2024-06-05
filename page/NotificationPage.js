@@ -6,7 +6,7 @@ import {
   ScrollView,
   Modal,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import OuterContainer from "../component/OuterContainer";
 import Header from "../component/Header";
 import AntDesign from "@expo/vector-icons/AntDesign";
@@ -14,6 +14,10 @@ import { darkTheme } from "../component/ThemeColor";
 import NotificationItem from "../component/NotificationItem";
 import NotificationAddModal from "../component/NotificationAddModal";
 import CenterModalContainer from "../component/CenterModalContainer";
+import { useFocusEffect } from "@react-navigation/native";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
+import NotificationEditPanel from "../component/NotificationEditPanel";
+import ConfirmCancelContainer from "../component/ConfirmCancelContainer";
 
 const dummyData = {
   list: [
@@ -101,6 +105,11 @@ const dummyData = {
   },
 };
 
+const LINK_NOTIFICATION_URL = "/reminders/links";
+const FOLDER_NOTIFICATION_URL = "/reminders/directories";
+const LINK_ONOFF_URL = "/reminders/links/on-off";
+const FOLDER_ONOFF_URL = "/reminders/directories/on-off";
+
 const NotificationPage = () => {
   const [changeId, setChangeId] = useState(-1);
   const [temp, setTemp] = useState("");
@@ -116,20 +125,73 @@ const NotificationPage = () => {
     false,
     false,
   ]);
+  const [links, setLinks] = useState([]);
+  const [folders, setFolders] = useState([]);
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [editNoti, setEditNoti] = useState({});
+  const [changedData, setChangedData] = useState({});
 
-  const handleToggle = (id) => {
-    setChangeId(id);
+  const axiosPrivate = useAxiosPrivate();
+
+  const handleToggle = (id, type, value) => {
+    let newLink = [...links];
+    let val;
+    for (i in links) {
+      if (links[i].id == id) {
+        links[i].Onoff = !links[i].Onoff;
+        val = !links[i].Onoff;
+        break;
+      }
+    }
+    setLinks(newLink);
+
+    //setChangeId(id);
     //axios server thing
+    try {
+      const response = axiosPrivate.put(
+        LINK_ONOFF_URL,
+        JSON.stringify({
+          onoff: val,
+          id: id,
+        })
+      );
+      console.log(response);
+    } catch (error) {
+      console.log(error.response);
+    }
   };
   const handleChange = (id, changedData) => {
-    setChangeId(id);
-    setTemp(changeData.notiType);
+    //setChangeId(id);
     //axios server thing
+  };
+  const handleNotificationDelete = (id) => {
+    console.log("DELETE OF" + id);
+  };
+
+  const handleEditSubmit = () => {
+    console.log(changedData);
+    setEditModalVisible(false);
   };
 
   const setLink = (id) => {
     setAddLink(id);
   };
+
+  useFocusEffect(
+    useCallback(() => {
+      const fetchData = async () => {
+        try {
+          const response1 = await axiosPrivate.get(LINK_NOTIFICATION_URL);
+          setLinks(response1.data.result);
+          const response2 = await axiosPrivate.get(FOLDER_NOTIFICATION_URL);
+          setFolders(response2.data.result);
+        } catch (err) {
+          console.log(err);
+        }
+      };
+      fetchData();
+    }, [])
+  );
 
   const getLink = (directory) => {
     return [
@@ -163,15 +225,38 @@ const NotificationPage = () => {
           />
         </View>
         <ScrollView style={styles.notiListContainer}>
-          {dummyData.list.map((item, index) => (
-            <NotificationItem
-              key={index}
-              data={item}
-              onToggle={() => handleToggle(data.id)}
-              onChange={(changedData) => handleChange(data.id, changedData)}
-            />
+          {links.map((item, index) => (
+            <Pressable
+              onPress={() => {
+                setEditModalVisible(true);
+                setEditNoti(item);
+              }}
+            >
+              <NotificationItem
+                key={index}
+                data={item}
+                onToggle={(id, type, value) => handleToggle(id, type, value)}
+              />
+            </Pressable>
           ))}
         </ScrollView>
+        <CenterModalContainer visible={editModalVisible}>
+          <NotificationEditPanel
+            data={editNoti}
+            onChnage={(time, day) => setChangedData({ time, day })}
+            onDelete={(id) => handleNotificationDelete(id)}
+          />
+          <View style={{ flexDirection: "row" }}>
+            <View style={{ flex: 2 }}>
+              <ConfirmCancelContainer
+                cancelVisible={true}
+                confirmVisible={true}
+                onCancel={() => setEditModalVisible(false)}
+                onConfirm={() => handleEditSubmit()}
+              />
+            </View>
+          </View>
+        </CenterModalContainer>
       </View>
     </OuterContainer>
   );
