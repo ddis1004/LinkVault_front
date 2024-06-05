@@ -29,7 +29,7 @@ const dummyData = {
 };
 
 const SEARCH_URI = "/links/search";
-const VEC_SEARCH_URI = "/";
+const VEC_SEARCH_URI = "/links/linkbrary";
 
 const SearchPage = () => {
   const [isFocused, setIsFocused] = useState(false);
@@ -289,6 +289,19 @@ const SearchPage = () => {
         console.log(error.response);
       }
     } else {
+      const params = {
+        url: searchText,
+      };
+      try {
+        const response = await axiosPrivate(VEC_SEARCH_URI, { params: params });
+        //console.log(response.data.result);
+        navigation.navigate("SearchResult", {
+          result: response.data.result,
+          keyword: "링크",
+        });
+      } catch (error) {
+        console.log(error.response);
+      }
     }
   };
 

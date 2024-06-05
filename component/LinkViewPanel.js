@@ -9,20 +9,29 @@ import { darkTheme } from "./ThemeColor";
 import { Image } from "expo-image";
 import { Entypo } from "@expo/vector-icons";
 import { useState, useRef, useEffect } from "react";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
 
 const LinkViewPanel = ({ link, onLongPress }) => {
   const [isVisible, setVisible] = useState(false);
   const contentHeight = useRef(new Animated.Value(0)).current;
   const maxContentHeight = 460;
   const date = new Date(link.createdAt);
+  const axiosPrivate = useAxiosPrivate();
+  const READ_UPDATE_URI = `/links/update-read-status/${link.id}`;
 
-  const toggleContent = () => {
+  const toggleContent = async () => {
     setVisible(!isVisible);
     Animated.timing(contentHeight, {
       toValue: isVisible ? 0 : maxContentHeight,
       duration: 200,
       useNativeDriver: false,
     }).start();
+    try {
+      const response = await axiosPrivate.patch(READ_UPDATE_URI);
+      console.log(response.data.result);
+    } catch (error) {
+      console.log(error.response);
+    }
   };
 
   return (

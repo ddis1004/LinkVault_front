@@ -106,14 +106,19 @@ const AccumulationPanel = ({ accumulation }) => {
 };
 
 const ToggleButton = ({ onToggle, active, data }) => {
+  const [isActive, setIsActive] = useState(active);
   const activeColor = darkTheme.highlight;
   const inactiveColor = "#262421";
+  const handlePress = () => {
+    setIsActive(!isActive);
+    onToggle(data.id, data.type, !isActive);
+  };
   return (
-    <Pressable onPress={() => onToggle(data.id, data.type, !active)}>
+    <Pressable onPress={() => handlePress()}>
       <Ionicons
         name="notifications-sharp"
         size={24}
-        color={active ? activeColor : inactiveColor}
+        color={isActive ? activeColor : inactiveColor}
       />
     </Pressable>
   );
@@ -210,13 +215,14 @@ const LINK_CONTENT_URL = "";
 const NotificationItem = ({ data, onToggle }) => {
   const axiosPrivate = useAxiosPrivate();
   const [name, setName] = useState("");
+  console.log(data);
 
   return (
     <View style={styles.container}>
       <Label data={data} type={data.type} />
       <View style={styles.timeToggleContainer}>
         <TimePanel time={data.reminderTime} />
-        <ToggleButton onToggle={onToggle} active={data.Onoff} data={data} />
+        <ToggleButton onToggle={onToggle} active={data.onoff} data={data} />
       </View>
       <WeekPanel reminderDate={data.reminderDate} />
     </View>

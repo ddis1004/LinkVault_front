@@ -3,14 +3,14 @@ import { useEffect, useState } from "react";
 import { darkTheme } from "./ThemeColor";
 import * as Progress from "react-native-progress";
 
-const ReadStatusPanel = ({ data }) => {
-  var viewData = { total: 1, read: 0 };
+const ReadStatusPanel = ({ data, total, read }) => {
+  //var viewData = { total: 1, read: 0 };
 
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     const animateProgress = () => {
-      let progressValue = data.read / data.total;
+      let progressValue = read / total;
       setProgress(progressValue);
     };
 
@@ -19,8 +19,8 @@ const ReadStatusPanel = ({ data }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>{data.total}개의 링크를 저장했어요</Text>
-      <Text style={styles.text}>{data.read}개를 읽었어요</Text>
+      <Text style={styles.text}>{total}개의 링크를 저장했어요</Text>
+      <Text style={styles.text}>{read}개를 읽었어요</Text>
       <Progress.Bar
         style={styles.progressBar}
         progress={progress}

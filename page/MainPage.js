@@ -66,7 +66,10 @@ function MainPage() {
         </View>
         <Pressable>
           <View style={styles.notificationContainer}>
-            <ReadStatusPanel data={dummyDataUnread} />
+            <ReadStatusPanel
+              total={response.totalLinks}
+              read={response.readLinks}
+            />
           </View>
         </Pressable>
         {response.directories != null && (

@@ -133,7 +133,7 @@ const NotificationPage = () => {
 
   const axiosPrivate = useAxiosPrivate();
 
-  const handleToggle = (id, type, value) => {
+  const handleToggle = async (id, type, value) => {
     let newLink = [...links];
     let val;
     for (i in links) {
@@ -148,14 +148,15 @@ const NotificationPage = () => {
     //setChangeId(id);
     //axios server thing
     try {
-      const response = axiosPrivate.put(
+      const response = await axiosPrivate.put(
         LINK_ONOFF_URL,
         JSON.stringify({
           onoff: val,
           id: id,
         })
       );
-      console.log(response);
+      console.log("onoff");
+      console.log(response.data);
     } catch (error) {
       console.log(error.response);
     }
@@ -239,6 +240,20 @@ const NotificationPage = () => {
               />
             </Pressable>
           ))}
+          {folders.map((item, index) => {
+            <Pressable
+              onPress={() => {
+                setEditModalVisible(true);
+                setEditNoti(item);
+              }}
+            >
+              <NotificationItem
+                key={index}
+                data={item}
+                onToggle={(id, type, value) => handleToggle(id, type, value)}
+              />
+            </Pressable>;
+          })}
         </ScrollView>
         <CenterModalContainer visible={editModalVisible}>
           <NotificationEditPanel

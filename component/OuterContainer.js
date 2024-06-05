@@ -21,7 +21,7 @@ const styles = StyleSheet.create({
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
-    height: Dimensions.get("window").height - 70,
+    height: Dimensions.get("window").height - 50,
     padding: 10,
   },
 });
