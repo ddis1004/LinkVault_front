@@ -8,13 +8,14 @@ import axios from "../api/axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Notifications from "expo-notifications";
 import { useShareIntent } from "expo-share-intent";
+import { usePushNotifications } from "../usePushNotifications";
 
 const LOGIN_URL = "/users/login";
 
 function LoginPage() {
   const [id, setId] = useState("");
   const [password, setPassword] = useState("");
-  const [expoPushToken, setExpoPushToken] = useState("");
+  const { expoPushToken, notification } = usePushNotifications();
 
   const navigation = useNavigation();
 
@@ -37,31 +38,19 @@ function LoginPage() {
         console.log(error);
       }
     };
-    // checkToken();
   });
-
-  useEffect(() => {
-    const getToken = async () => {
-      const token = await registerForPushNotificationsAsync();
-      //console.log(token);
-    };
-    getToken();
-  }, []);
-
-  useEffect(() => {
-    //console.log(expoPushToken);
-  }, [expoPushToken]);
 
   const buttonHandler = async (e) => {
     try {
+      token = expoPushToken.data;
       const response = await axios.post(
         LOGIN_URL,
-        JSON.stringify({ email: id, password: password, token: expoPushToken }),
+        JSON.stringify({ email: id, password: password, token: token}),
         {
           withCredentials: true,
         }
-      );
 
+      );
       const tokenInfo = response.data.result.tokenInfo;
       await AsyncStorage.setItem(
         "Tokens",
@@ -119,35 +108,6 @@ function LoginPage() {
       </View>
     </View>
   );
-}
-
-async function registerForPushNotificationsAsync() {
-  let token;
-
-  if (typeof Constants.isDevice === "undefined") {
-    Constants.isDevice = Platform.OS !== "web";
-  }
-
-  if (Constants.isDevice) {
-    const { status: existingStatus } =
-      await Notifications.getPermissionsAsync();
-    let finalStatus = existingStatus;
-
-    if (existingStatus !== "granted") {
-      const { status } = await Notifications.requestPermissionsAsync();
-      finalStatus = status;
-    }
-
-    if (finalStatus !== "granted") {
-      alert("Failed to get push token for push notification!");
-      return;
-    }
-
-    token = (await Notifications.getExpoPushTokenAsync()).data;
-  } else {
-    alert("Must use physical device for Push Notifications");
-  }
-  return token;
 }
 
 const styles = StyleSheet.create({

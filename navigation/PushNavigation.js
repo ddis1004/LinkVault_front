@@ -2,8 +2,20 @@ import { createNavigationContainerRef } from '@react-navigation/native';
 
 export const navigationRef = createNavigationContainerRef();
 
-export function navigate(name, params) {
+let navigationReadyResolve;
+const navigationReadyPromise = new Promise((resolve) => {
+  navigationReadyResolve = resolve;
+});
+
+export function onNavigationReady() {
   if (navigationRef.isReady()) {
-    navigationRef.navigate(name, params);
+    navigationReadyResolve();
   }
+}
+
+export async function navigate(name, params) {
+  if (!navigationRef.isReady()) {
+    await navigationReadyPromise;
+  }
+  navigationRef.navigate(name, params);
 }

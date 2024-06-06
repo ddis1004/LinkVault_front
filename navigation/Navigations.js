@@ -6,7 +6,7 @@ import SignupPage from "../page/SignupPage";
 import AccountOptionPage from "../page/AccountOptionPage";
 import * as Linking from "expo-linking";
 import DirectoryViewPage from "../page/DirectoryViewPage";
-import { navigationRef } from "./PushNavigation";
+import { navigationRef, onNavigationReady } from "./PushNavigation";
 import { useShareIntent } from "expo-share-intent";
 import { axiosPrivate } from "../api/axios";
 import SearchNavigation from "./SearchNavigation";
@@ -31,7 +31,7 @@ function Navigations() {
   }
 
   return (
-    <NavigationContainer style={{ flex: 1 }} linking={linking}>
+    <NavigationContainer style={{ flex: 1 }} linking={linking} ref={navigationRef} onReady={onNavigationReady}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Login" component={LoginPage} />
         <Stack.Screen name="Signup" component={SignupPage} />
