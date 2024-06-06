@@ -90,7 +90,7 @@ function MainPage() {
           <View style={styles.recommendationContainer}>
             <Text style={styles.directoryTitle}>이런 링크는 어떠세요?</Text>
             {response.recommendedLink.map((item) => (
-              <LinkViewPanel link={item} />
+              <LinkViewPanel link={item} key={item.id} />
             ))}
           </View>
         )}

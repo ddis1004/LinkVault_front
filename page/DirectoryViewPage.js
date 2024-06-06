@@ -1,4 +1,11 @@
-import { View, Text, StyleSheet, ScrollView, Pressable } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Pressable,
+  TextInput,
+} from "react-native";
 import { React, useState, useCallback } from "react";
 import OuterContainer from "../component/OuterContainer";
 import Header from "../component/Header";
@@ -6,13 +13,15 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { darkTheme } from "../component/ThemeColor";
 import { Image } from "expo-image";
 import LinkViewPanel from "../component/LinkViewPanel";
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import AddFolderModal from "../component/AddFolderModal";
 import { Entypo } from "@expo/vector-icons";
 import BottomModal from "../component/BottomModal";
 import ConfirmCancelContainer from "../component/ConfirmCancelContainer";
+import CenterModalContainer from "../component/CenterModalContainer";
+import GloablDirectorySelectPanel from "../component/GlobalDirectorySelectPanel";
 
 const dummyData = {
   hierarchy: [
@@ -78,6 +87,9 @@ const dummyData = {
   ],
 };
 
+const UPDATE_LOCATION_URL = "/links/update-location";
+const FOLDER_RENAME_URL = "/directories/names";
+
 const DirectoryViewPage = ({ route }) => {
   const [response, setResponse] = useState({});
   const [links, setLinks] = useState([]);
@@ -90,6 +102,14 @@ const DirectoryViewPage = ({ route }) => {
   const [folderModalVisible, setFolderModalVisible] = useState(false);
   const [controlLink, setControlLink] = useState({});
   const [controlFodler, setControlFolder] = useState({});
+  const [linkMoveFolder, setLinkMoveFolder] = useState({});
+  const [folderSelectModalVisible, setFolderSelectModalVisible] =
+    useState(false);
+  const [renameFolder, setRenameFolder] = useState("");
+  const [renameFolderModalVisible, setRenameFolderModalVisible] =
+    useState(false);
+
+  const navigation = useNavigation();
 
   const DIRECTORY_URL = "/directories/" + route.params.directory;
   const DELETE_LINK_URL_PREFIX = "/links/users/";
@@ -107,7 +127,7 @@ const DirectoryViewPage = ({ route }) => {
         }
       };
       fetchData();
-    }, [directory, controlLink])
+    }, [directory, controlLink, controlFodler])
   );
 
   useFocusEffect(
@@ -137,6 +157,8 @@ const DirectoryViewPage = ({ route }) => {
   };
 
   const handleFolderPress = (folder) => {
+    console.log(folder);
+    navigation.navigate("Directory", { directory: folder.directoryId });
     setControlFolder(folder);
   };
 
@@ -149,11 +171,61 @@ const DirectoryViewPage = ({ route }) => {
     try {
       const deleteURL = DELETE_LINK_URL_PREFIX + link.id;
       await axiosPrivate.delete(deleteURL);
+      setLinks(links.filter((l) => l.id !== link.id));
     } catch (error) {
       console.log(error.response);
     }
     setControlLink(-1);
     setLinkModalVisible(false);
+  };
+
+  const handleLinkMove = (link) => {
+    setFolderSelectModalVisible(true);
+  };
+
+  const handleLinkMoveSubmit = async () => {
+    setLinkModalVisible(false);
+    const message = {
+      linkId: controlLink.id,
+      movingDirectoryId: linkMoveFolder.id,
+    };
+
+    try {
+      const response = await axiosPrivate.put(
+        UPDATE_LOCATION_URL,
+        JSON.stringify(message)
+      );
+
+      const updatedDirectoryResponse = await axiosPrivate.get(DIRECTORY_URL);
+      setLinks(updatedDirectoryResponse.data.result.userLinks);
+      setResponse(updatedDirectoryResponse.data.result);
+      setCurrentDirectory(updatedDirectoryResponse.data.result.directoryName);
+    } catch (error) {
+      console.log(error.response);
+    }
+    setFolderSelectModalVisible(false);
+  };
+
+  const handleRenameFolderConfirm = async () => {
+    const message = {
+      id: controlFodler.directoryId,
+      name: renameFolder,
+    };
+
+    try {
+      const response = await axiosPrivate.patch(
+        FOLDER_RENAME_URL,
+        JSON.stringify(message)
+      );
+      const updatedDirectoryResponse = await axiosPrivate.get(DIRECTORY_URL);
+      setLinks(updatedDirectoryResponse.data.result.userLinks);
+      setResponse(updatedDirectoryResponse.data.result);
+      setCurrentDirectory(updatedDirectoryResponse.data.result.directoryName);
+      console.log(response);
+    } catch (error) {
+      console.log(error.response);
+    }
+    setRenameFolderModalVisible(false);
   };
 
   return (
@@ -243,21 +315,32 @@ const DirectoryViewPage = ({ route }) => {
             color={"#BBE1FA"}
             style={{ marginLeft: -24 }}
           />
-          <Text style={styles.linkButtonText}>{controlLink.title}</Text>
+          <Text
+            style={[styles.linkButtonText, { maxWidth: 400 }]}
+            numberOfLines={1}
+            ellipsizeMode="tail"
+          >
+            {controlLink.title}
+          </Text>
         </View>
+        <Pressable
+          style={styles.linkControlButton}
+          onPress={() => handleLinkMove(controlLink)}
+        >
+          <Text style={styles.linkButtonText}>이동</Text>
+        </Pressable>
         <Pressable
           style={styles.linkControlButton}
           onPress={() => handleDeleteLink(controlLink)}
         >
-          <Text style={styles.linkButtonText}>삭제</Text>
-        </Pressable>
-        <Pressable style={styles.linkControlButton}>
-          <Text style={styles.linkButtonText}>이동</Text>
+          <Text style={[styles.linkButtonText, { color: "#B80000" }]}>
+            삭제
+          </Text>
         </Pressable>
         <ConfirmCancelContainer
           cancelVisible={true}
+          confirmVisible={false}
           onCancel={() => setLinkModalVisible(false)}
-          onConfirm={() => setLinkModalVisible(false)}
         />
       </BottomModal>
       <BottomModal visible={folderModalVisible}>
@@ -272,18 +355,55 @@ const DirectoryViewPage = ({ route }) => {
             {controlFodler.directoryName}
           </Text>
         </View>
+
         <Pressable style={styles.linkControlButton}>
-          <Text style={styles.linkButtonText}>삭제</Text>
+          <Text
+            style={styles.linkButtonText}
+            onPress={() => {
+              setRenameFolderModalVisible(true);
+              setFolderModalVisible(false);
+            }}
+          >
+            이름 변경
+          </Text>
         </Pressable>
         <Pressable style={styles.linkControlButton}>
-          <Text style={styles.linkButtonText}>이름 변경</Text>
+          <Text style={[styles.linkButtonText, { color: "#B80000" }]}>
+            삭제
+          </Text>
         </Pressable>
         <ConfirmCancelContainer
           cancelVisible={true}
+          confirmVisible={false}
           onCancel={() => setFolderModalVisible(false)}
           onConfirm={() => setFolderModalVisible(false)}
         />
       </BottomModal>
+      <CenterModalContainer visible={folderSelectModalVisible}>
+        <GloablDirectorySelectPanel
+          onValueChange={(folder) => setLinkMoveFolder(folder)}
+        />
+        <ConfirmCancelContainer
+          cancelVisible={true}
+          confirmVisible={true}
+          onCancel={() => setFolderSelectModalVisible(false)}
+          onConfirm={() => handleLinkMoveSubmit(linkMoveFolder)}
+        />
+      </CenterModalContainer>
+      <CenterModalContainer visible={renameFolderModalVisible}>
+        <Text style={[styles.linkButtonText, { marginBottom: 10 }]}>
+          폴더의 새 이름을 입력해주세요
+        </Text>
+        <TextInput
+          style={styles.folderRenameInput}
+          onChangeText={(text) => setRenameFolder(text)}
+        />
+        <ConfirmCancelContainer
+          cancelVisible={true}
+          onCancel={() => setRenameFolderModalVisible(false)}
+          onConfirm={() => handleRenameFolderConfirm()}
+        />
+      </CenterModalContainer>
     </OuterContainer>
   );
 };
@@ -333,7 +453,7 @@ const GridColumn = ({ col, folders, onPressItem, onLongPressItem }) => {
         if (index % 3 == col) {
           return (
             <FolderItem
-              key={item.link}
+              key={item.id}
               folder={item}
               onPress={onPressItem}
               onLongPress={onLongPressItem}
@@ -369,7 +489,7 @@ const Heirarchy = ({ hierarchy }) => {
   return (
     <View style={styles.container}>
       {hierarchy.map((item, index) => (
-        <View style={styles.mapContainer} key={item.path}>
+        <View style={styles.mapContainer} key={item.id}>
           <MaterialCommunityIcons
             name="folder-open"
             size={20}
@@ -417,6 +537,7 @@ const styles = StyleSheet.create({
     fontFamily: "Pretendard",
   },
   linkControlButton: {
+    marginVertical: 10,
     alignItems: "center",
   },
   linkButtonText: {
@@ -428,7 +549,19 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   folderModalLabel: {
+    paddingHorizontal: 10,
+    marginBottom: 20,
     flexDirection: "row",
     justifyContent: "center",
+  },
+  folderRenameInput: {
+    backgroundColor: darkTheme.text,
+    fontSize: 20,
+    color: darkTheme.background,
+    textAlign: "center",
+    fontFamily: "Pretendard",
+    borderRadius: 5,
+    height: 30,
+    marginBottom: 30,
   },
 });

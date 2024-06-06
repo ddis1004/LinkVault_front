@@ -37,7 +37,7 @@ function LoginPage() {
         console.log(error);
       }
     };
-    checkToken();
+    // checkToken();
   });
 
   useEffect(() => {

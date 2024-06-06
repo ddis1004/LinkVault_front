@@ -6,7 +6,7 @@ import ConfirmCancelContainer from "./ConfirmCancelContainer";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import { EvilIcons } from "@expo/vector-icons";
 
-const UPDATE_NOTIFICATION_LINK = "/reminders/link";
+const UPDATE_NOTIFICATION_LINK = "/reminders/links";
 const UPDATE_NOTIFICATION_FOLDER = "/reminders/directories";
 
 const NotificationEditPanel = ({ onSubmit, onCancel, data }) => {
@@ -58,14 +58,14 @@ const NotificationEditPanel = ({ onSubmit, onCancel, data }) => {
     const message = {
       id: data.id,
       onoff: data.onoff,
-      reminderTime: time,
-      reminderDate: days,
+      reminderTime: time.slice(0, 5),
+      reminderDays: days,
     };
+    console.log(message);
     const URL =
       data.type == "link"
         ? UPDATE_NOTIFICATION_LINK
         : UPDATE_NOTIFICATION_FOLDER;
-    console.log(URL);
 
     try {
       const response = await axiosPrivate.put(URL, JSON.stringify(message));

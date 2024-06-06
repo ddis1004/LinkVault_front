@@ -351,6 +351,18 @@ const SearchPage = () => {
           </Animated.View>
         </View>
 
+        {searchInputType == "link" && (
+          <View
+            style={{
+              marginTop: 230,
+            }}
+          >
+            <Text style={styles.buttonText}>
+              링크를 붙여넣으면 비슷한 링크를 찾아드려요!
+            </Text>
+          </View>
+        )}
+
         {searchInputType == "normal" && (
           <View>
             <Text style={styles.keywordLabel}>검색 방식</Text>

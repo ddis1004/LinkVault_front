@@ -12,7 +12,7 @@ export const Label = ({ data, type }) => {
     labelContainer: {
       flexDirection: "row",
       alignItems: "center",
-      paddingRight: 40,
+      maxWidth: "90%",
     },
     text: {
       marginLeft: 3,

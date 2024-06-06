@@ -52,6 +52,7 @@ const AddLinkPage = () => {
     if (title != "") {
       autoTitleSave = false;
     }
+    navigation.navigate("Main");
 
     try {
       console.log(postContent);
@@ -63,8 +64,6 @@ const AddLinkPage = () => {
     } catch (err) {
       console.log(err.response);
     }
-
-    navigation.navigate("Main");
   };
 
   return (

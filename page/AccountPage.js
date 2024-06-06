@@ -24,7 +24,6 @@ const AccountPage = () => {
   const [unreadTime, setUnreadTime] = useState(1);
   const [countAlertActive, setCountAlertActive] = useState(false);
   const [timeAlertActive, setTimeAlertActive] = useState(false);
-  const [test, setTest] = useState(2);
 
   const axiosPrivate = useAxiosPrivate();
 
@@ -91,7 +90,7 @@ const AccountPage = () => {
   return (
     <OuterContainer>
       <View style={styles.innerContainer}>
-        <Header title={"내 정보" + test}></Header>
+        <Header title={"내 정보"}></Header>
         <View style={styles.settingTextContainer}>
           <Text style={styles.settingLabel}>알림 설정</Text>
           <View style={styles.settingContainer}>

@@ -190,7 +190,7 @@ const NotificationPage = () => {
         }
       };
       fetchData();
-    }, [])
+    }, [editNoti])
   );
 
   const getLink = (directory) => {
@@ -241,6 +241,7 @@ const NotificationPage = () => {
           ))}
           {folders.map((item, index) => {
             <Pressable
+              key={item.id}
               onPress={() => {
                 setEditModalVisible(true);
                 setEditNoti(item);
@@ -257,8 +258,14 @@ const NotificationPage = () => {
         <CenterModalContainer visible={editModalVisible}>
           <NotificationEditPanel
             data={editNoti}
-            onSubit={() => setEditModalVisible(false)}
-            onCancel={() => setEditModalVisible(false)}
+            onSubmit={() => {
+              setEditModalVisible(false);
+              setEditNoti(null);
+            }}
+            onCancel={() => {
+              setEditModalVisible(false);
+              setEditNoti(null);
+            }}
           />
         </CenterModalContainer>
       </View>
