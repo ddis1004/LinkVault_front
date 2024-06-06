@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "LinkVault",
-    "slug": "LinkVault",
+    "slug": "linktest",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -21,6 +21,7 @@
     "android": {
       "package": "com.capstone.linkbrary",
       "hermesEnabled": true,
+      "googleServicesFile": "./android/app/google-services.json",
       "intentFilters": [
         {
           "action": "VIEW",
@@ -67,7 +68,7 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "ef34efa5-ea7a-48ba-8ab1-3fd902334e9f"
+        "projectId": "8257b929-e8ee-4160-8f37-7e1fcbdb793b"
       }
     }
   }

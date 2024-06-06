@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "284468969323",
+    "project_id": "test2-136b7",
+    "storage_bucket": "test2-136b7.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:284468969323:android:4c09bce8dde7c92c5a162e",
+        "android_client_info": {
+          "package_name": "com.capstone.linkbrary"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBR0GFDGkzIfEiKYyDn27i9noBjd1qARbY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

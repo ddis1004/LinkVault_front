@@ -10,85 +10,20 @@ import { createStackNavigator } from "@react-navigation/stack";
 import { navigationRef } from "./navigation/PushNavigation";
 import { useShareIntent } from "expo-share-intent";
 import { ShareIntentProvider, useShareIntentContext } from "expo-share-intent";
+import { usePushNotifications } from "./usePushNotifications";
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-  }),
-});
-
-async function registerForPushNotificationsAsync() {
-  let token;
-  if (typeof Constants.isDevice === "undefined") {
-    Constants.isDevice = Platform.OS !== "web";
-  }
-
-  if (Constants.isDevice) {
-    const { status: existingStatus } =
-      await Notifications.getPermissionsAsync();
-    let finalStatus = existingStatus;
-
-    if (existingStatus !== "granted") {
-      const { status } = await Notifications.requestPermissionsAsync();
-      finalStatus = status;
-    }
-
-    if (finalStatus !== "granted") {
-      alert("Failed to get push token for push notification!");
-      return;
-    }
-
-    if (Platform.OS == "a//ndroid") {
-      await Notifications.setNotificationChannelAsync("default", {
-        name: "default",
-        importance: Notifications.AndroidImportance.MAX,
-        vibrationPattern: [0, 250, 250, 250],
-        lightColor: "#FF231F7C",
-      });
-
-      token = (await Notifications.getExpoPushTokenAsync()).data;
-    } else {
-      //alert("Must use physical device for Push Notifications");
-    }
-  }
-
-  return token;
-}
 const Stack = createStackNavigator();
 
 export default function App() {
   const [isFontLoaded, setIsFontLoaded] = useState(false);
-  // const [expoPushToken, setExpoPushToken] = useState("");
   const notificationListener = useRef();
   const responseListener = useRef();
-
+  const { expoPushToken, notification } = usePushNotifications();
+  
+  const data = JSON.stringify(notification, undefined, 2);
+   
   useEffect(() => {
     loadFonts();
-    registerForPushNotificationsAsync()
-      .then((token) => {
-        if (token) {
-          setExpoPushToken(token);
-        }
-      })
-      .catch((err) => console.log("Error in getting push token:", err));
-
-    notificationListener.current =
-      Notifications.addNotificationReceivedListener((notification) => {
-        console.log(notification);
-      });
-
-    responseListener.current =
-      Notifications.addNotificationResponseReceivedListener((response) => {
-        const data = response.notification.request.content.data;
-        console.log(data);
-        if (data && data.directory) {
-          navigationRef.current?.navigate("DirectoryView", {
-            directory: data.directory,
-          });
-        }
-      });
     return;
   }, []);
 
