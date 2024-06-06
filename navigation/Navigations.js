@@ -9,6 +9,7 @@ import DirectoryViewPage from "../page/DirectoryViewPage";
 import { navigationRef } from "./PushNavigation";
 import { useShareIntent } from "expo-share-intent";
 import { axiosPrivate } from "../api/axios";
+import SearchNavigation from "./SearchNavigation";
 
 const Stack = createNativeStackNavigator();
 const prefix = Linking.createURL("/");
@@ -36,7 +37,7 @@ function Navigations() {
         <Stack.Screen name="Signup" component={SignupPage} />
         <Stack.Screen style={{ flex: 1 }} name="Main" component={BottomTab} />
         <Stack.Screen name="DirectoryView" component={DirectoryViewPage} />
-        {/* <Stack.Screen name="Linkbrary" componenet={LinkbraryPage} /> */}
+        {/* <Stack.Screen name="ShareIntent" component={SearchNavigation} /> */}
       </Stack.Navigator>
     </NavigationContainer>
   );

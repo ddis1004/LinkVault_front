@@ -85,7 +85,7 @@ const BottomTab = () => {
         }}
       />
       <Tab.Screen
-        name="Notification"
+        name="searchNavi"
         component={SearchNavigation}
         options={{
           title: "검색",

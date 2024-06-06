@@ -215,7 +215,6 @@ const LINK_CONTENT_URL = "";
 const NotificationItem = ({ data, onToggle }) => {
   const axiosPrivate = useAxiosPrivate();
   const [name, setName] = useState("");
-  console.log(data);
 
   return (
     <View style={styles.container}>

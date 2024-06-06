@@ -89,7 +89,9 @@ function MainPage() {
         {response.recommendedLink != null && (
           <View style={styles.recommendationContainer}>
             <Text style={styles.directoryTitle}>이런 링크는 어떠세요?</Text>
-            <LinkViewPanel link={response.recommendedLink} />
+            {response.recommendedLink.map((item) => (
+              <LinkViewPanel link={item} />
+            ))}
           </View>
         )}
       </ScrollView>

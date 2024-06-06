@@ -155,7 +155,6 @@ const NotificationPage = () => {
           id: id,
         })
       );
-      console.log("onoff");
       console.log(response.data);
     } catch (error) {
       console.log(error.response);
@@ -258,19 +257,9 @@ const NotificationPage = () => {
         <CenterModalContainer visible={editModalVisible}>
           <NotificationEditPanel
             data={editNoti}
-            onChnage={(time, day) => setChangedData({ time, day })}
-            onDelete={(id) => handleNotificationDelete(id)}
+            onSubit={() => setEditModalVisible(false)}
+            onCancel={() => setEditModalVisible(false)}
           />
-          <View style={{ flexDirection: "row" }}>
-            <View style={{ flex: 2 }}>
-              <ConfirmCancelContainer
-                cancelVisible={true}
-                confirmVisible={true}
-                onCancel={() => setEditModalVisible(false)}
-                onConfirm={() => handleEditSubmit()}
-              />
-            </View>
-          </View>
         </CenterModalContainer>
       </View>
     </OuterContainer>

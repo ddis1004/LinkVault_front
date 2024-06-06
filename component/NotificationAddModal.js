@@ -17,6 +17,7 @@ export const TimeSelectPanel = ({
   initialDays = [],
   onTimeChange,
   onDayChange,
+  onSubmit = null,
 }) => {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [time, setTime] = useState(initialTime);
@@ -75,17 +76,18 @@ export const TimeSelectPanel = ({
   const toggleDay = async (index) => {
     const newDays = [...activeDays];
     const day = days[index];
-    for (i in activeDays) {
-      if (newDays[i] == day) {
-        newDays.splice(i, 1);
-        await setActiveDays(newDays);
-        onDayChange(activeDays);
-        return;
-      }
+    const existingIndex = newDays.indexOf(day); // Check if the day already exists in activeDays
+
+    if (existingIndex !== -1) {
+      // If the day exists, remove it from the array
+      newDays.splice(existingIndex, 1);
+    } else {
+      // If the day doesn't exist, add it to the array
+      newDays.push(day);
     }
-    newDays.push(day);
+
     await setActiveDays(newDays);
-    onDayChange(activeDays);
+    onDayChange(newDays); // Pass newDays instead of activeDays
   };
 
   const int2digit = (n) => {

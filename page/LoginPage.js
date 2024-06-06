@@ -7,6 +7,7 @@ import { darkTheme } from "../component/ThemeColor";
 import axios from "../api/axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Notifications from "expo-notifications";
+import { useShareIntent } from "expo-share-intent";
 
 const LOGIN_URL = "/users/login";
 
@@ -17,6 +18,28 @@ function LoginPage() {
 
   const navigation = useNavigation();
 
+  const { hasShareIntent, shareIntent, resetShareIntent, error } =
+    useShareIntent();
+
+  useEffect(() => {
+    if (hasShareIntent && !shareIntent.weburl) {
+      console.log(`share intent wbUrl : ${shareIntent.webUrl}`);
+      navigation.navigate("Signup");
+    }
+
+    const checkToken = async () => {
+      try {
+        const tokens = await AsyncStorage.getItem("Tokens");
+        if (tokens) {
+          navigation.navigate("Main");
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    checkToken();
+  });
+
   useEffect(() => {
     const getToken = async () => {
       const token = await registerForPushNotificationsAsync();
@@ -26,7 +49,7 @@ function LoginPage() {
   }, []);
 
   useEffect(() => {
-    console.log(expoPushToken);
+    //console.log(expoPushToken);
   }, [expoPushToken]);
 
   const buttonHandler = async (e) => {
@@ -40,7 +63,7 @@ function LoginPage() {
       );
 
       const tokenInfo = response.data.result.tokenInfo;
-      AsyncStorage.setItem(
+      await AsyncStorage.setItem(
         "Tokens",
         JSON.stringify({
           accessToken: tokenInfo.accessToken,

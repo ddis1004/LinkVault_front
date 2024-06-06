@@ -50,7 +50,7 @@ async function registerForPushNotificationsAsync() {
 
       token = (await Notifications.getExpoPushTokenAsync()).data;
     } else {
-      alert("Must use physical device for Push Notifications");
+      //alert("Must use physical device for Push Notifications");
     }
   }
 
@@ -63,8 +63,6 @@ export default function App() {
   // const [expoPushToken, setExpoPushToken] = useState("");
   const notificationListener = useRef();
   const responseListener = useRef();
-  const { hasShareIntent, shareIntent, resetShareIntent, error } =
-    useShareIntent();
 
   useEffect(() => {
     loadFonts();

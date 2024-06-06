@@ -36,14 +36,8 @@ const SignupPage = () => {
     } catch (err) {
       console.log(err.response);
     }
-
-    // setId("");
-    // setPassword("");
-    // setName("");
-    // Simulate sign-up success
-    //alert(`Sign-up successful! Welcome, ${name}!`);
-    // Clear input fields after sign-up
   };
+
   return (
     <OuterContainer>
       <View style={styles.container}>

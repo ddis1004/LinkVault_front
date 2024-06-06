@@ -1,11 +1,19 @@
-import { View, Text } from "react-native";
+import { View, Text, Pressable } from "react-native";
 import { React, useState } from "react";
 import { Label, TimePanel, WeekPanel } from "./NotificationItem";
 import { TimeSelectPanel } from "./NotificationAddModal";
+import ConfirmCancelContainer from "./ConfirmCancelContainer";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
+import { EvilIcons } from "@expo/vector-icons";
 
-const NotificationEditPanel = ({ onChnage, onDelete, data, itemType }) => {
+const UPDATE_NOTIFICATION_LINK = "/reminders/link";
+const UPDATE_NOTIFICATION_FOLDER = "/reminders/directories";
+
+const NotificationEditPanel = ({ onSubmit, onCancel, data }) => {
   const [days, setDays] = useState(data.reminderDate);
   const [time, setTime] = useState(data.reminderTime);
+
+  const axiosPrivate = useAxiosPrivate();
 
   const handleDayChange = (days) => {
     setDays(days);
@@ -43,13 +51,66 @@ const NotificationEditPanel = ({ onChnage, onDelete, data, itemType }) => {
     return `${int2digit(hour)}:${int2digit(minute)}:00:00`;
   };
 
+  const handleCancel = () => {
+    onCancel();
+  };
+  const handleSubmit = async () => {
+    const message = {
+      id: data.id,
+      onoff: data.onoff,
+      reminderTime: time,
+      reminderDate: days,
+    };
+    const URL =
+      data.type == "link"
+        ? UPDATE_NOTIFICATION_LINK
+        : UPDATE_NOTIFICATION_FOLDER;
+    console.log(URL);
+
+    try {
+      const response = await axiosPrivate.put(URL, JSON.stringify(message));
+      console.log(response.data);
+    } catch (error) {
+      console.log(error.response);
+    }
+    onSubmit();
+  };
+
+  const handleDelete = async () => {
+    const URL =
+      data.type == "link"
+        ? `${UPDATE_NOTIFICATION_LINK}/${data.id}`
+        : `${UPDATE_NOTIFICATION_FOLDER}/${data.id}`;
+
+    try {
+      const response = await axiosPrivate.delete(URL);
+      console.log(response.data);
+    } catch (error) {
+      console.log(error.response);
+    }
+    onCancel();
+  };
+
   return (
     <View>
-      <Label type={"link"} data={data} />
+      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+        <Label type={"link"} data={data} />
+        <Pressable onPress={() => handleDelete()} style={{ marginRight: 10 }}>
+          <EvilIcons name="trash" size={30} color="#B80000" />
+        </Pressable>
+      </View>
+
       <TimeSelectPanel
         initialTime={stringToDate(data.reminderTime)}
-        setDays={setDays}
-        setTime={handleTimeChange}
+        initialDays={data.reminderDate}
+        onTimeChange={(time) => setTime(time)}
+        onDayChange={(day) => setDays(day)}
+      />
+      <ConfirmCancelContainer
+        confirmVisible={true}
+        cancelVisible={true}
+        onCancel={() => handleCancel()}
+        onConfirm={() => handleSubmit()}
       />
     </View>
   );
