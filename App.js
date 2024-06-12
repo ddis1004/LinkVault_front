@@ -11,6 +11,7 @@ import { navigationRef } from "./navigation/PushNavigation";
 import { useShareIntent } from "expo-share-intent";
 import { ShareIntentProvider, useShareIntentContext } from "expo-share-intent";
 import { usePushNotifications } from "./usePushNotifications";
+import { LogBox } from "react-native";
 
 const Stack = createStackNavigator();
 
@@ -19,9 +20,12 @@ export default function App() {
   const notificationListener = useRef();
   const responseListener = useRef();
   const { expoPushToken, notification } = usePushNotifications();
-  
+
   const data = JSON.stringify(notification, undefined, 2);
-   
+
+  LogBox.ignoreLogs(["Warning: ..."]); // Ignore log notification by message
+  LogBox.ignoreAllLogs(); //Ignore all log notifications
+
   useEffect(() => {
     loadFonts();
     return;

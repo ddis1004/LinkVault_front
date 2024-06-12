@@ -52,11 +52,10 @@ const AddLinkPage = () => {
     if (title != "") {
       autoTitleSave = false;
     }
-    navigation.navigate("Main");
 
     try {
       console.log(postContent);
-      const response = await axiosPrivate.post(
+      const response = axiosPrivate.post(
         ADDLINK_URL,
         JSON.stringify(postContent)
       );
@@ -64,6 +63,7 @@ const AddLinkPage = () => {
     } catch (err) {
       console.log(err.response);
     }
+    navigation.navigate("Home");
   };
 
   return (

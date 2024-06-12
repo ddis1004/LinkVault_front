@@ -34,6 +34,31 @@ const LinkViewPanel = ({ link, onLongPress }) => {
     }
   };
 
+  const splitText = (text) => {
+    // 정규표현식을 사용하여 텍스트를 분할
+    const splitResult = text.split(/(\d+\.\s+)/).filter(Boolean);
+
+    // 숫자와 마침표 기준으로 나누어진 각 문장을 합침
+    const result = [];
+    for (let i = 0; i < splitResult.length; i += 2) {
+      result.push(splitResult[i] + (splitResult[i + 1] || ""));
+    }
+    return result;
+  };
+
+  const SplitTextComponent = (text) => {
+    const splitSentences = splitText(text);
+    return (
+      <View style={styles.container}>
+        {splitSentences.map((item, index) => (
+          <Text key={index} style={styles.summaryText}>
+            {item}
+          </Text>
+        ))}
+      </View>
+    );
+  };
+
   return (
     <View style={styles.container}>
       <TouchableOpacity
@@ -60,12 +85,6 @@ const LinkViewPanel = ({ link, onLongPress }) => {
             >{`${date.getFullYear()} 년 ${date.getMonth()}월 ${date.getDate()}일 ${date.getHours()}:${date.getMinutes()}`}</Text>
           )}
         </View>
-        {/* <Entypo
-          style={styles.editIcon}
-          name="dots-three-vertical"
-          size={20}
-          color={darkTheme.text}
-        /> */}
       </TouchableOpacity>
       <Animated.View style={[styles.content, { height: contentHeight }]}>
         <Image source={link.thumbnail} style={styles.image} />
@@ -73,13 +92,32 @@ const LinkViewPanel = ({ link, onLongPress }) => {
           <View>
             <Text style={styles.summaryHeader}>요약</Text>
             <Text style={styles.summaryText}>
-              {link.summary.split("\n")[0]}
+              {link.summary
+                .slice(link.summary.indexOf("1"), link.summary.indexOf("2"))
+                .replace("\n", "")
+                .replace("\n", "")
+                .replace("\n", "")
+                .replace("\n", "")
+                .replace("\n", "")
+                .replace("\n", "")}
             </Text>
             <Text style={styles.summaryText}>
-              {link.summary.split("\n")[1]}
+              {link.summary
+                .slice(link.summary.indexOf("2"), link.summary.indexOf("3"))
+                .replace("\n", "")
+                .replace("\n", "")
+                .replace("\n", "")
+                .replace("\n", "")
+                .replace("\n", "")}
             </Text>
             <Text style={styles.summaryText}>
-              {link.summary.split("\n")[2]}
+              {link.summary
+                .slice(link.summary.indexOf("3"))
+                .replace("\n", "")
+                .replace("\n", "")
+                .replace("\n", "")
+                .replace("\n", "")
+                .replace("\n", "")}
             </Text>
           </View>
         )}

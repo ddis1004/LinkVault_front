@@ -16,7 +16,7 @@ const ReadStatusPanel = ({ total, read }) => {
         const progressValue = readCount / totalCount;
 
         setProgress(progressValue);
-        console.log(read, total);
+        // console.log(read, total);
         progressWidth.setValue(0);
 
         Animated.timing(progressWidth, {

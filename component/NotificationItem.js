@@ -30,12 +30,12 @@ export const Label = ({ data, type }) => {
   };
 
   switch (type) {
-    case "folder":
+    case "directory":
       component = (
         <View style={styles.labelContainer}>
           <Entypo name="folder" size={16} color={darkTheme.highlight_low} />
           <Text numberOfLines={1} style={styles.text} ellipsizeMode="tail">
-            {folderString(data.target.location)}
+            {data.title}
           </Text>
         </View>
       );
@@ -215,7 +215,7 @@ const LINK_CONTENT_URL = "";
 const NotificationItem = ({ data, onToggle }) => {
   const axiosPrivate = useAxiosPrivate();
   const [name, setName] = useState("");
-
+  if (data.type == "directory") console.log(data);
   return (
     <View style={styles.container}>
       <Label data={data} type={data.type} />

@@ -168,10 +168,22 @@ const NotificationPage = () => {
     console.log("DELETE OF" + id);
   };
 
-  const handleEditSubmit = () => {
-    console.log(changedData);
-    setEditModalVisible(false);
-  };
+  // const handleEditSubmit = async () => {
+  //   console.log(changedData);
+  //   try {
+  //     let url;
+  //     if (changedData.type == "link") url = LINK_NOTIFICATION_URL;
+  //     else url = FOLDER_NOTIFICATION_URL;
+  //     const response = await axiosPrivate.post(
+  //       LINK_NOTIFICATION_URL,
+  //       changedData
+  //     );
+  //     console.log(response.data);
+  //   } catch (error) {
+  //     console.log(error.response);
+  //   }
+  //   setEditModalVisible(false);
+  // };
 
   const setLink = (id) => {
     setAddLink(id);
@@ -185,6 +197,9 @@ const NotificationPage = () => {
           setLinks(response1.data.result);
           const response2 = await axiosPrivate.get(FOLDER_NOTIFICATION_URL);
           setFolders(response2.data.result);
+          console.log(folders);
+          // console.log(response1.data.result);
+          // console.log(response2.data.result);
         } catch (err) {
           console.log(err);
         }
@@ -239,7 +254,7 @@ const NotificationPage = () => {
               />
             </Pressable>
           ))}
-          {folders.map((item, index) => {
+          {folders.map((item, index) => (
             <Pressable
               key={item.id}
               onPress={() => {
@@ -248,19 +263,20 @@ const NotificationPage = () => {
               }}
             >
               <NotificationItem
-                key={index}
                 data={item}
                 onToggle={(id, type, value) => handleToggle(id, type, value)}
               />
-            </Pressable>;
-          })}
+            </Pressable>
+          ))}
         </ScrollView>
+
         <CenterModalContainer visible={editModalVisible}>
           <NotificationEditPanel
             data={editNoti}
             onSubmit={() => {
               setEditModalVisible(false);
               setEditNoti(null);
+              handleEditSubmit();
             }}
             onCancel={() => {
               setEditModalVisible(false);

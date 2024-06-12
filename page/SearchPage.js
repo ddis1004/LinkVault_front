@@ -382,7 +382,7 @@ const SearchPage = () => {
               <PeriodButton name={3} text={"1개월"}></PeriodButton>
               <PeriodButton name={4} text={"직접 설정"}></PeriodButton>
             </View>
-            {dateMode == "custom" && (
+            {dateMode == 4 && (
               <View style={styles.datePanel}>
                 <Pressable
                   style={styles.dateButton}

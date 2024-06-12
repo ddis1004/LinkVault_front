@@ -6,7 +6,7 @@ import {
   Pressable,
   TextInput,
 } from "react-native";
-import { React, useState, useCallback } from "react";
+import { React, useState, useCallback, useEffect } from "react";
 import OuterContainer from "../component/OuterContainer";
 import Header from "../component/Header";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -22,6 +22,7 @@ import BottomModal from "../component/BottomModal";
 import ConfirmCancelContainer from "../component/ConfirmCancelContainer";
 import CenterModalContainer from "../component/CenterModalContainer";
 import GloablDirectorySelectPanel from "../component/GlobalDirectorySelectPanel";
+import * as Linking from "expo-linking";
 
 const dummyData = {
   hierarchy: [
@@ -114,21 +115,41 @@ const DirectoryViewPage = ({ route }) => {
   const DIRECTORY_URL = "/directories/" + route.params.directory;
   const DELETE_LINK_URL_PREFIX = "/links/users/";
 
-  useFocusEffect(
-    useCallback(() => {
-      const fetchData = async () => {
-        try {
-          const response = await axiosPrivate.get(DIRECTORY_URL);
-          setLinks(response.data.result.userLinks);
-          setResponse(response.data.result);
-          setCurrentDirectory(response.data.result.directoryName);
-        } catch (err) {
-          console.log(err.response);
-        }
-      };
-      fetchData();
-    }, [directory, controlLink, controlFodler])
-  );
+  // useFocusEffect(
+  //   useCallback(() => {
+  //     const fetchData = async () => {
+  //       try {
+  //         const response = await axiosPrivate.get(DIRECTORY_URL);
+  //         setLinks(response.data.result.userLinks);
+  //         setResponse(response.data.result);
+  //         setCurrentDirectory(response.data.result.directoryName);
+  //       } catch (err) {
+  //         console.log(err.response);
+  //       }
+  //     };
+  //     fetchData();
+  //   }, [directory, controlLink, controlFodler])
+  // );
+
+  const openLink = (link) => {
+    //const url = "https://www.example.com";
+    console.log(link.url);
+    Linking.openURL(link.url);
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axiosPrivate.get(DIRECTORY_URL);
+        setLinks(response.data.result.userLinks);
+        setResponse(response.data.result);
+        setCurrentDirectory(response.data.result.directoryName);
+      } catch (err) {
+        console.log(err.response);
+      }
+    };
+    fetchData();
+  }, [directory, controlLink, controlFodler]);
 
   useFocusEffect(
     useCallback(() => {
@@ -325,9 +346,15 @@ const DirectoryViewPage = ({ route }) => {
         </View>
         <Pressable
           style={styles.linkControlButton}
+          onPress={() => openLink(controlLink)}
+        >
+          <Text style={styles.linkButtonText}>링크 확인</Text>
+        </Pressable>
+        <Pressable
+          style={styles.linkControlButton}
           onPress={() => handleLinkMove(controlLink)}
         >
-          <Text style={styles.linkButtonText}>이동</Text>
+          <Text style={styles.linkButtonText}>폴더 이동</Text>
         </Pressable>
         <Pressable
           style={styles.linkControlButton}

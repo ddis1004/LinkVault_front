@@ -34,6 +34,12 @@ const AccountPage = () => {
       const fetchData = async () => {
         try {
           const response = await axiosPrivate.get(SETTINGS_URL);
+          setTimeAlertActive(response.data.result.unreadTimeAlert);
+          setCountAlertActive(response.data.result.unreadFolderAlert);
+          setUnreadCount(response.data.result.unreadFolderAlertCount);
+          setUnreadTime(
+            parseInt(response.data.result.unreadAlertTime.slice(0, 2))
+          );
           console.log(response.data);
         } catch (err) {
           console.log(err.response);
@@ -61,28 +67,36 @@ const AccountPage = () => {
   const openMenu = () => setVisible(true);
   const closeMenu = () => setVisible(false);
 
-  const handleSubmitChange = () => {
-    const data = {
-      unreadTimeAlert: timeAlertActive,
-      unreadAlertTime: `${unreadTime}:00`,
-      unreadFolderAlertCount: unreadCount,
-      unreadFolderAlert: countAlertActive,
+  const handleSubmitChange = async () => {
+    const updateToServer = async () => {
+      const data = {
+        unreadTimeAlert: timeAlertActive,
+        unreadAlertTime: `${unreadTime}:00`,
+        unreadFolderAlertCount: unreadCount,
+        unreadFolderAlert: countAlertActive,
+      };
+      console.log(data);
+      try {
+        const response = await axiosPrivate.put(
+          SETTINGS_URL,
+          JSON.stringify(data)
+        );
+        console.log(response.data);
+      } catch (err) {
+        console.log(err);
+      }
     };
-    //console.log(data);
-    setTest(1);
-    try {
-      const response = axiosPrivate.put(SETTINGS_URL, data);
-      console.log(response);
-    } catch (err) {
-      //console.log(err);
-    }
+
+    setTimeout(function () {
+      updateToServer();
+    }, 100);
   };
 
   const handleToggle = (mode) => {
     if (mode == "count") {
-      setCountAlertActive((previousState) => !previousState);
+      setCountAlertActive((countAlertActive) => !countAlertActive);
     } else {
-      setTimeAlertActive((previousState) => !previousState);
+      setTimeAlertActive((timeAlertActive) => !timeAlertActive);
     }
     handleSubmitChange();
   };
@@ -98,7 +112,7 @@ const AccountPage = () => {
               <View style={styles.settingItem}>
                 <Text style={styles.settingLabel}>미열람 링크 누적 알림</Text>
                 <Text style={styles.settingText}>
-                  {`읽지 않은 링크가 ${dummyData.unreadCount}개 쌓이면 알림`}
+                  {`읽지 않은 링크가 ${unreadCount}개 쌓이면 알림`}
                 </Text>
               </View>
             </Pressable>
@@ -117,7 +131,7 @@ const AccountPage = () => {
               <View style={styles.settingItem}>
                 <Text style={styles.settingLabel}>미열람 링크 시간 알림</Text>
                 <Text style={styles.settingText}>
-                  {`저장한 후 ${dummyData.unreadCount}시간이 지난 링크 알림`}
+                  {`저장한 후 ${unreadTime}시간이 지난 링크 알림`}
                 </Text>
               </View>
             </Pressable>
